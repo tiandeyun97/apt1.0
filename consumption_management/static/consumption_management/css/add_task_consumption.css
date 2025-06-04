@@ -1,0 +1,489 @@
+/* 基础变量 */
+:root {
+  --primary-color: #2c7be5;
+  --primary-light: #d2e3fc;
+  --primary-dark: #1e5dab;
+  --secondary-color: #6c757d;
+  --success-color: #00d97e;
+  --info-color: #39afd1;
+  --warning-color: #f6c343;
+  --danger-color: #e63757;
+  --light-color: #f9fbfd;
+  --dark-color: #12263f;
+  --gray-100: #f9fbfd;
+  --gray-200: #edf2f9;
+  --gray-300: #e3ebf6;
+  --gray-400: #d2ddec;
+  --gray-500: #b1c2d9;
+  --gray-600: #95aac9;
+  --gray-700: #6e84a3;
+  --gray-800: #3b506c;
+  --gray-900: #283e59;
+  --border-radius-sm: 0.25rem;
+  --border-radius: 0.375rem;
+  --border-radius-lg: 0.5rem;
+  --border-radius-xl: 0.75rem;
+  --box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.03);
+  --box-shadow-sm: 0 0.125rem 0.25rem rgba(18, 38, 63, 0.075);
+  --box-shadow-lg: 0 1rem 2rem rgba(18, 38, 63, 0.05);
+  --transition-base: all 0.2s ease;
+  --font-family-sans-serif: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-family-monospace: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* 全局样式 */
+body {
+  background-color: var(--gray-200);
+  font-family: var(--font-family-sans-serif);
+  color: var(--gray-800);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* 页面容器 */
+.page-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* 卡片组件 */
+.info-card {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  border: none;
+  transition: var(--transition-base);
+}
+
+/* 带渐变强调条的卡片 */
+.info-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, var(--primary-color), var(--info-color));
+}
+
+.info-card .row {
+  row-gap: 1.25rem;
+}
+
+.info-card .label {
+  color: var(--gray-600);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 0.25rem;
+}
+
+.info-card .value {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--gray-800);
+}
+
+/* 表格卡片 */
+.table-card {
+  background: white;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--box-shadow);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: none;
+}
+
+.table-card h4 {
+  color: var(--dark-color);
+  font-weight: 600;
+  font-size: 1.125rem;
+  margin-bottom: 1.25rem;
+}
+
+/* 表格样式 */
+.custom-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin-bottom: 1rem;
+}
+
+.custom-table th {
+  background-color: var(--gray-100);
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: var(--gray-700);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  border-top: 1px solid var(--gray-200);
+  border-bottom: 1px solid var(--gray-200);
+  white-space: nowrap;
+}
+
+.custom-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--gray-200);
+  color: var(--gray-800);
+  vertical-align: middle;
+  font-size: 0.875rem;
+}
+
+.custom-table tbody tr {
+  transition: var(--transition-base);
+}
+
+.custom-table tbody tr:hover {
+  background-color: var(--gray-100);
+}
+
+/* 表格尾部样式 */
+.custom-table tfoot tr {
+  background-color: var(--gray-100);
+  font-weight: 600;
+}
+
+.custom-table tfoot td {
+  padding: 0.75rem 1rem;
+  color: var(--dark-color);
+}
+
+/* 按钮样式 */
+.btn {
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  transition: var(--transition-base);
+  border-radius: var(--border-radius);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  box-shadow: 0 0.125rem 0.25rem rgba(44, 123, 229, 0.1);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+  box-shadow: 0 0.5rem 1.5rem rgba(44, 123, 229, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+  color: white;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+  box-shadow: 0 0.5rem 1.5rem rgba(108, 117, 125, 0.2);
+  transform: translateY(-1px);
+}
+
+.btn-action {
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--border-radius);
+  transition: var(--transition-base);
+}
+
+.btn-action:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow-sm);
+}
+
+.btn-group .btn {
+  box-shadow: none;
+}
+
+.btn-outline-primary {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.btn-outline-danger {
+  color: var(--danger-color);
+  border-color: var(--danger-color);
+}
+
+.btn-outline-danger:hover {
+  background-color: var(--danger-color);
+  border-color: var(--danger-color);
+  color: white;
+}
+
+.btn i {
+  margin-right: 0.375rem;
+  font-size: 0.875rem;
+}
+
+/* 模态框样式 */
+.modal-content {
+  border-radius: var(--border-radius-lg);
+  border: none;
+  box-shadow: 0 1.5rem 4rem rgba(18, 38, 63, 0.1);
+  overflow: hidden;
+}
+
+.modal-header {
+  background: linear-gradient(45deg, var(--primary-color), var(--info-color));
+  color: white;
+  padding: 1.25rem 1.5rem;
+  border-bottom: none;
+}
+
+.modal-title {
+  font-weight: 600;
+  font-size: 1.125rem;
+  display: flex;
+  align-items: center;
+}
+
+.modal-title i {
+  margin-right: 0.5rem;
+  font-size: 1rem;
+}
+
+.btn-close-white {
+  filter: brightness(0) invert(1);
+  opacity: 0.75;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  padding: 1rem 1.5rem;
+  background-color: var(--gray-100);
+  border-top: 1px solid var(--gray-200);
+}
+
+/* 表单控件 */
+.form-label {
+  font-weight: 500;
+  color: var(--gray-700);
+  margin-bottom: 0.375rem;
+  font-size: 0.875rem;
+}
+
+.form-control {
+  height: calc(1.5em + 1rem + 2px);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--gray-700);
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.form-control:focus {
+  color: var(--gray-700);
+  background-color: #fff;
+  border-color: var(--primary-color);
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(44, 123, 229, 0.15);
+}
+
+.form-text {
+  color: var(--gray-600);
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+/* 数据为空的状态 */
+.text-center {
+  color: var(--gray-600);
+  padding: 3rem 0;
+  font-style: italic;
+}
+
+/* 顶部导航栏 */
+.top-header {
+  background: linear-gradient(45deg, var(--primary-dark), var(--primary-color));
+  color: white;
+  padding: 0.75rem 1.5rem;
+  box-shadow: var(--box-shadow);
+}
+
+.platform-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* 徽章样式 */
+.badge {
+  padding: 0.35em 0.65em;
+  font-weight: 600;
+  font-size: 0.75em;
+  border-radius: 0.375rem;
+}
+
+/* 适配Bootstrap 5徽章类 */
+.bg-primary {
+  background-color: var(--primary-color) !important;
+  color: white;
+}
+
+.bg-success {
+  background-color: var(--success-color) !important;
+  color: white;
+}
+
+.bg-warning {
+  background-color: var(--warning-color) !important;
+  color: var(--dark-color);
+}
+
+.bg-danger {
+  background-color: var(--danger-color) !important;
+  color: white;
+}
+
+.bg-info {
+  background-color: var(--info-color) !important;
+  color: white;
+}
+
+.bg-secondary {
+  background-color: var(--secondary-color) !important;
+  color: white;
+}
+
+/* 响应式调整 */
+@media (max-width: 992px) {
+  .page-container {
+    padding: 1rem;
+  }
+  
+  .info-card, .table-card {
+    padding: 1.25rem;
+  }
+  
+  .custom-table th, 
+  .custom-table td {
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .info-card .value {
+    font-size: 0.875rem;
+  }
+  
+  .modal-header {
+    padding: 1rem;
+  }
+  
+  .modal-body {
+    padding: 1.25rem;
+  }
+  
+  .table-responsive {
+    border-radius: var(--border-radius);
+  }
+}
+
+/* 滚动条美化 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--gray-200);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gray-400);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-500);
+}
+
+/* 按钮组样式 */
+.d-flex.align-items-center .btn-action {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-outline-secondary {
+  border-color: var(--gray-300);
+  color: var(--gray-700);
+  background-color: white;
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--gray-100);
+  color: var(--gray-800);
+  border-color: var(--gray-400);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+/* 调整按钮内部图标和文字的间距 */
+.btn i {
+  transition: transform 0.2s ease;
+}
+
+.btn:hover i {
+  transform: translateX(-2px); /* 返回按钮的图标往左移动 */
+}
+
+.btn-primary:hover i.fa-plus-circle {
+  transform: rotate(90deg); /* 新增按钮的加号图标旋转 */
+}
+
+/* 数字列居中和格式化 */
+.custom-table td:nth-child(n+2):nth-child(-n+16) {
+  text-align: right;
+  font-family: var(--font-family-sans-serif);
+  font-size: 0.85rem;
+}
+
+/* 百分比列样式 */
+.custom-table td:nth-child(5),
+.custom-table td:nth-child(8),
+.custom-table td:nth-child(11),
+.custom-table td:nth-child(14) {
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
+/* 表头样式增强 */
+.custom-table th {
+  text-align: center;
+  font-size: 0.75rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+} 

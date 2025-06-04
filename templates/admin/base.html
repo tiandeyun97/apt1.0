@@ -1,0 +1,188 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style>
+        /* 隐藏 SimpleUI 的面包屑导航 */
+        .el-breadcrumb {
+            display: none !important;
+        }
+        /* 隐藏 Django admin 的面包屑导航 */
+        .breadcrumbs {
+            display: none !important;
+        }
+
+        /* 表格容器样式 */
+        .el-container {
+            padding: 20px !important;
+        }
+
+        /* 表格整体样式 */
+        .el-table {
+            background: #fff !important;
+            border-radius: 8px !important;
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,0.05) !important;
+            border: 1px solid #ebeef5 !important;
+            overflow: hidden !important;
+        }
+
+        /* 表头样式 */
+        .el-table thead th {
+            background: linear-gradient(to right, #f8f9fa, #ffffff) !important;
+            color: #2c3e50 !important;
+            font-weight: 600 !important;
+            padding: 12px 8px !important;
+            border-bottom: 2px solid #ebeef5 !important;
+        }
+
+        /* 表格单元格样式 */
+        .el-table td {
+            padding: 12px 8px !important;
+            border-bottom: 1px solid #ebeef5 !important;
+            color: #606266 !important;
+            transition: all 0.3s ease !important;
+        }
+
+        /* 表格行样式 */
+        .el-table tr {
+            transition: all 0.3s ease !important;
+        }
+
+        /* 偶数行背景 */
+        .el-table--striped .el-table__body tr.el-table__row--striped td {
+            background: #fafafa !important;
+        }
+
+        /* 鼠标悬停效果 */
+        .el-table tbody tr:hover > td {
+            background: #f5f7fa !important;
+        }
+
+        /* 表格内链接样式 */
+        .el-table .cell a {
+            color: #409EFF !important;
+            text-decoration: none !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            display: inline-block !important;
+        }
+
+        .el-table .cell a:hover {
+            color: #66b1ff !important;
+            transform: translateX(2px) !important;
+        }
+
+        /* 状态列样式 */
+        .el-table .cell .el-tag {
+            padding: 4px 8px !important;
+            border-radius: 4px !important;
+            font-size: 12px !important;
+        }
+
+        .el-table .cell .el-tag--success {
+            background-color: #f0f9eb !important;
+            color: #67c23a !important;
+            border: 1px solid #e1f3d8 !important;
+        }
+
+        /* 搜索区域样式 */
+        .filter-container {
+            background: #fff !important;
+            padding: 20px !important;
+            border-radius: 8px !important;
+            margin-bottom: 20px !important;
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,0.05) !important;
+        }
+
+        /* 搜索输入框样式 */
+        .el-input__inner {
+            border-radius: 6px !important;
+            border: 1px solid #dcdfe6 !important;
+            padding: 8px 12px !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .el-input__inner:focus {
+            border-color: #409EFF !important;
+            box-shadow: 0 0 0 2px rgba(64,158,255,0.2) !important;
+        }
+
+        /* 搜索按钮样式 */
+        .el-button--primary {
+            background: linear-gradient(135deg, #409EFF 0%, #66b1ff 100%) !important;
+            border: none !important;
+            padding: 8px 16px !important;
+            border-radius: 6px !important;
+            transition: all 0.3s ease !important;
+            color: white !important;
+        }
+
+        .el-button--primary:hover {
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(64,158,255,0.3) !important;
+        }
+
+        /* 分页样式 */
+        .el-pagination {
+            margin-top: 20px !important;
+            padding: 16px !important;
+            background: #fff !important;
+            border-radius: 8px !important;
+            box-shadow: 0 2px 12px 0 rgba(0,0,0,0.05) !important;
+            text-align: center !important;
+        }
+
+        .el-pagination button {
+            background: #fff !important;
+            border: 1px solid #dcdfe6 !important;
+            border-radius: 4px !important;
+            padding: 0 4px !important;
+            margin: 0 4px !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .el-pagination button:hover {
+            color: #409EFF !important;
+            border-color: #c6e2ff !important;
+            background-color: #ecf5ff !important;
+        }
+
+        .el-pagination .active {
+            background: #409EFF !important;
+            color: white !important;
+            border-color: #409EFF !important;
+        }
+
+        /* 序号列样式 */
+        .el-table .cell {
+            line-height: 23px !important;
+        }
+
+        /* 表格为空时的样式 */
+        .el-table__empty-block {
+            min-height: 120px !important;
+            background: #fafafa !important;
+            border-radius: 4px !important;
+        }
+
+        .el-table__empty-text {
+            color: #909399 !important;
+            font-size: 14px !important;
+        }
+
+        /* 修复表格边框 */
+        .el-table--border::after,
+        .el-table--group::after,
+        .el-table::before {
+            display: none !important;
+        }
+
+        .el-table--border {
+            border: 1px solid #ebeef5 !important;
+        }
+    </style>
+{% endblock %}
+
+{% block nav-breadcrumbs %}{% endblock %}
+{% block breadcrumbs %}{% endblock %} 

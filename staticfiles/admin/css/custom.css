@@ -1,0 +1,139 @@
+/* 自定义管理后台样式 */
+
+/* 导航栏样式 */
+#header {
+    background: linear-gradient(135deg, #1e88e5 0%, #42a5f5 100%);
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* 侧边栏样式 */
+.el-menu {
+    border-right: none;
+}
+
+.el-menu-item.is-active {
+    background: #e3f2fd !important;
+    color: #1e88e5 !important;
+}
+
+/* 内容区域样式 */
+.content-wrapper {
+    background: #f8f9fa;
+    min-height: calc(100vh - 50px);
+}
+
+/* 卡片样式 */
+.card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* 按钮样式 */
+.el-button--primary {
+    background: #1e88e5;
+    border-color: #1e88e5;
+}
+
+.el-button--primary:hover {
+    background: #1976d2;
+    border-color: #1976d2;
+}
+
+/* 表格样式 */
+.el-table {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.el-table th {
+    background: #f8f9fa !important;
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+/* 表单样式 */
+.el-form-item__label {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.el-input__inner:focus {
+    border-color: #1e88e5;
+}
+
+/* 统计卡片样式 */
+.stats-card {
+    padding: 1.5rem;
+    border-radius: 12px;
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.stats-card.primary {
+    background: linear-gradient(135deg, #1e88e5 0%, #42a5f5 100%);
+}
+
+.stats-card.success {
+    background: linear-gradient(135deg, #43a047 0%, #66bb6a 100%);
+}
+
+.stats-card.warning {
+    background: linear-gradient(135deg, #fb8c00 0%, #ffa726 100%);
+}
+
+.stats-card.info {
+    background: linear-gradient(135deg, #00acc1 0%, #26c6da 100%);
+}
+
+/* 进度条样式 */
+.el-progress-bar__outer {
+    border-radius: 8px;
+}
+
+.el-progress-bar__inner {
+    border-radius: 8px;
+    background: linear-gradient(90deg, #1e88e5 0%, #42a5f5 100%);
+}
+
+/* 标签样式 */
+.el-tag {
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* 弹窗样式 */
+.el-dialog {
+    border-radius: 12px;
+}
+
+.el-dialog__header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #eee;
+}
+
+.el-dialog__body {
+    padding: 1.5rem;
+}
+
+/* 面包屑导航样式 */
+.el-breadcrumb__inner a {
+    color: #666;
+    font-weight: normal;
+}
+
+.el-breadcrumb__item:last-child .el-breadcrumb__inner {
+    color: #1e88e5;
+    font-weight: 500;
+}
+
+/* 分页样式 */
+.el-pagination.is-background .el-pager li:not(.disabled).active {
+    background-color: #1e88e5;
+} 

@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+{% load humanize %}
+{% load static %}
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>消耗记录详情列表</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <link href="{% static 'consumption_management/css/consumption_records.css' %}" rel="stylesheet">
+    <style>
+        /* 自定义Select2样式 */
+        .select2-container--bootstrap-5 .select2-selection {
+            height: 38px;
+            border-color: #dee2e6;
+        }
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+            padding-top: 4px;
+        }
+        
+        /* 可编辑字段样式 */
+        .editable-field {
+            position: relative;
+        }
+        
+        .editable-field .edit-return-flow-btn {
+            opacity: 0.2;
+            transition: opacity 0.2s;
+        }
+        
+        .editable-field:hover .edit-return-flow-btn {
+            opacity: 1;
+        }
+        
+        .editable-field .input-group-sm {
+            width: 150px;
+        }
+        
+        .editable-field .return-flow-input {
+            min-width: 80px;
+        }
+        
+        /* Toast容器样式 */
+        #toast-container {
+            z-index: 1050;
+        }
+    </style>
+</head>
+<body>
+    {% csrf_token %}
+    <div class="content-container">
+        <div class="container-fluid">
+            <!-- 统计指标卡片 -->
+            <div class="row mb-4">
+                <div class="col-md-2">
+                    <div class="stats-card total-card">
+                        <div class="card-body">
+                            <h6><i class="fas fa-calculator me-2"></i>总消耗</h6>
+                            <h3>¥ {{ total_consumption|floatformat:2 }}</h3>
+                            <div class="stats-icon">
+                                <i class="fas fa-wallet"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card prev-card">
+                        <div class="card-body">
+                            <h6><i class="fas fa-calendar-minus me-2"></i>上月消耗</h6>
+                            <h3>¥ {{ prev_month_consumption|floatformat:2 }}</h3>
+                            <div class="stats-icon">
+                                <i class="fas fa-calendar-alt"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="stats-card current-card">
+                        <div class="card-body">
+                            <h6><i class="fas fa-calendar-week me-2"></i>本月消耗</h6>
+                            <h3>¥ {{ current_month_consumption|floatformat:2 }}</h3>
+                            <div class="stats-icon">
+                                <i class="fas fa-calendar-day"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card yesterday-card">
+                        <div class="card-body">
+                            <h6><i class="fas fa-calendar-day me-2"></i>昨日消耗</h6>
+                            <h3>¥ {{ yesterday_consumption|floatformat:2 }}</h3>
+                            <div class="stats-icon">
+                                <i class="fas fa-history"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card today-card">
+                        <div class="card-body">
+                            <h6><i class="fas fa-calendar-day me-2"></i>今日消耗</h6>
+                            <h3>¥ {{ today_consumption|floatformat:2 }}</h3>
+                            <div class="stats-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 筛选条件卡片 -->
+            <div class="card filter-card">
+                <div class="card-body">
+                    <form method="get" action="{% url 'consumption_stats:consumption_records_list' %}" id="filter-form">
+                        <div class="row g-3">
+                            <div class="col-md-2">
+                                <label for="start_date" class="form-label">开始日期</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="far fa-calendar-alt"></i></span>
+                                    <input type="date" class="form-control" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+                                </div>
+                                <div class="form-text">
+                                    <small class="text-info"><i class="fas fa-info-circle"></i> 默认显示最近60天数据</small>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="end_date" class="form-label">结束日期</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="far fa-calendar-alt"></i></span>
+                                    <input type="date" class="form-control" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+                                </div>
+                                <div class="form-text">
+                                    <small>需要更早数据请调整日期范围</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="project" class="form-label">项目</label>
+                                <select class="form-select select2-search" id="project" name="project_id" data-placeholder="搜索项目...">
+                                    <option value="">全部项目</option>
+                                    {% if selected_project_id %}
+                                        {% for project in projects %}
+                                            {% if project.ProjectID|stringformat:"i" == selected_project_id %}
+                                                <option value="{{ project.ProjectID }}" selected>{{ project.ProjectName }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="task" class="form-label">任务</label>
+                                <select class="form-select select2-search" id="task" name="task_id" data-placeholder="搜索任务...">
+                                    <option value="">全部任务</option>
+                                    {% if request.GET.task_id %}
+                                        {% for task in tasks %}
+                                            {% if task.id|stringformat:"i" == request.GET.task_id %}
+                                                <option value="{{ task.id }}" selected>{{ task.name }}</option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="creator" class="form-label">创建人</label>
+                                <select class="form-select" id="creator" name="creator_id">
+                                    <option value="">全部创建人</option>
+                                    {% for creator in creators %}
+                                    <option value="{{ creator.id }}" {% if creator.id|stringformat:"i" == selected_creator_id %}selected{% endif %}>
+                                        {{ creator.username }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-12 text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>查询
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary ms-2">
+                                    <i class="fas fa-undo me-2"></i>重置
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 视图切换功能 -->
+            <div class="card mb-3">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="me-3"><i class="fas fa-eye me-2"></i>视图选择:</span>
+                        <div class="btn-group" role="group" aria-label="视图切换">
+                            <button type="button" class="btn btn-sm btn-primary active" id="date-view-btn">
+                                <i class="fas fa-calendar-day me-1"></i> 按日期视图
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="project-view-btn">
+                                <i class="fas fa-project-diagram me-1"></i> 按项目视图
+                            </button>
+                        </div>
+                    </div>
+                    <div>
+                        <small class="text-muted"><i class="fas fa-info-circle me-1"></i> 提示: 项目视图将按项目和任务分组展示消耗数据</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 消耗记录表格 - 日期视图 -->
+            <div class="card" id="date-view-container">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-table me-2"></i>消耗记录列表 (按日期)</span>
+                    <div>
+                        <!-- 添加导入按钮和下载模板按钮 -->
+                        <button type="button" class="btn btn-sm btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#importModal">
+                            <i class="fas fa-file-import me-1"></i> 导入Excel
+                        </button>
+                        <a href="{% url 'consumption_stats:download_import_template' %}" class="btn btn-sm btn-outline-info me-2">
+                            <i class="fas fa-file-download me-1"></i> 下载导入模板
+                        </a>
+                        <a href="{% url 'consumption_stats:export_excel' %}?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-file-excel me-1"></i> 导出Excel
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 显示Django消息提示 -->
+                {% if messages %}
+                <div class="messages-container px-3 pt-3">
+                    {% for message in messages %}
+                    <div class="alert {% if message.tags == 'error' %}alert-danger{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'info' %}alert-info{% else %}alert-warning{% endif %} alert-dismissible fade show" role="alert">
+                        {% if message.tags == 'error' %}<i class="fas fa-exclamation-circle me-2"></i>
+                        {% elif message.tags == 'success' %}<i class="fas fa-check-circle me-2"></i>
+                        {% elif message.tags == 'info' %}<i class="fas fa-info-circle me-2"></i>
+                        {% else %}<i class="fas fa-exclamation-triangle me-2"></i>{% endif %}
+                        {{ message|safe }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div class="card-body p-0">
+                    <div class="table-responsive" style="max-height: 600px;">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 50px; text-align: center;">#</th>
+                                    <th>日期</th>
+                                    <th>任务名称</th>
+                                    <th>项目</th>
+                                    <th>当日消耗</th>
+                                    <th>回流</th>
+                                    <th>实际消耗</th>
+                                    <th class="mobile-hide">回流占比</th>
+                                    <th class="mobile-hide">展示量</th>
+                                    <th>点击量</th>
+                                    <th class="mobile-hide">点击转化率</th>
+                                    <th class="mobile-hide">点击成本</th>
+                                    <th>注册人数</th>
+                                    <th class="mobile-hide">注册转化率</th>
+                                    <th class="mobile-hide">注册成本</th>
+                                    <th>首充人数</th>
+                                    <th class="mobile-hide">首充转化率</th>
+                                    <th class="mobile-hide">首充成本</th>
+                                    <th class="mobile-hide">ECPM</th>
+                                    <th>创建人</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for consumption in consumptions %}
+                                <tr>
+                                    <td style="text-align: center; font-weight: 500;">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                                    <td>{{ consumption.date|date:"Y-m-d" }}</td>
+                                    <td>
+                                        <span class="ellipsis" title="{{ consumption.task.name }}">
+                                            <a href="{% url 'consumption_stats:add_task_consumption' consumption.task.id %}?source=consumption_list" class="task-link">
+                                                {{ consumption.task.name }}
+                                            </a>
+                                        </span>
+                                    </td>
+                                    <td><span class="ellipsis" title="{{ consumption.task.project.ProjectName }}">{{ consumption.task.project.ProjectName }}</span></td>
+                                    <td><span class="badge bg-light text-dark">{{ consumption.daily_consumption }}</span></td>
+                                    <td>
+                                        <div class="editable-field" data-consumption-id="{{ consumption.id }}">
+                                            <span class="editable-text">{{ consumption.return_flow }}</span>
+                                            <a href="#" class="edit-return-flow-btn ms-1" title="编辑回流">
+                                                <i class="fas fa-edit text-primary"></i>
+                                            </a>
+                                            <div class="edit-form d-none">
+                                                <div class="input-group input-group-sm">
+                                                    <input type="number" class="form-control form-control-sm return-flow-input" value="{{ consumption.return_flow }}" step="0.01">
+                                                    <button class="btn btn-sm btn-primary save-return-flow-btn" type="button">
+                                                        <i class="fas fa-save"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-secondary cancel-edit-btn" type="button">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="fw-bold text-primary actual-consumption-value">{{ consumption.actual_consumption }}</span></td>
+                                    <td class="mobile-hide"><span class="return-flow-ratio-value">{{ consumption.return_flow_ratio }}</span>%</td>
+                                    <td class="mobile-hide">{{ consumption.impressions }}</td>
+                                    <td>{{ consumption.clicks }}</td>
+                                    <td class="mobile-hide">{{ consumption.click_conversion_rate }}%</td>
+                                    <td class="mobile-hide">{{ consumption.click_cost }}</td>
+                                    <td><span class="badge bg-success text-white">{{ consumption.registrations }}</span></td>
+                                    <td class="mobile-hide">{{ consumption.registration_conversion_rate }}%</td>
+                                    <td class="mobile-hide">{{ consumption.registration_cost }}</td>
+                                    <td><span class="badge bg-warning text-dark">{{ consumption.first_deposits }}</span></td>
+                                    <td class="mobile-hide">{{ consumption.first_deposit_conversion_rate }}%</td>
+                                    <td class="mobile-hide">{{ consumption.first_deposit_cost }}</td>
+                                    <td class="mobile-hide">{{ consumption.ecpm }}</td>
+                                    <td><span class="ellipsis" title="{{ consumption.creator.username }}">{{ consumption.creator.username }}</span></td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="20" class="text-center py-5">
+                                        <div class="text-muted">
+                                            <i class="fas fa-search fa-3x mb-3"></i>
+                                            <p>没有找到符合条件的消耗记录</p>
+                                            <small>请尝试调整筛选条件</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    {% if consumptions %}
+                    <div class="fixed-summary-container">
+                        <table class="table summary-table mb-0">
+                            <tr class="summary-row">
+                                <td style="width: 50px;"></td>
+                                <td colspan="3" class="text-center">合计</td>
+                                <td>{{ summary.total_daily_consumption|floatformat:2 }}</td>
+                                <td>{{ summary.total_return_flow|floatformat:2 }}</td>
+                                <td>{{ summary.total_actual_consumption|floatformat:2 }}</td>
+                                <td class="mobile-hide">-</td>
+                                <td class="mobile-hide">{{ summary.total_impressions }}</td>
+                                <td>{{ summary.total_clicks }}</td>
+                                <td class="mobile-hide">-</td>
+                                <td class="mobile-hide">-</td>
+                                <td>{{ summary.total_registrations }}</td>
+                                <td class="mobile-hide">-</td>
+                                <td class="mobile-hide">-</td>
+                                <td>{{ summary.total_first_deposits }}</td>
+                                <td class="mobile-hide">-</td>
+                                <td class="mobile-hide">-</td>
+                                <td class="mobile-hide">-</td>
+                                <td>-</td>
+                            </tr>
+                        </table>
+                    </div>
+                    {% endif %}
+                </div>
+                {% if consumptions %}
+                <div class="card-footer bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">展示 {{ page_obj.start_index }} - {{ page_obj.end_index }} 条，共 {{ total_records }} 条记录</small>
+                        
+                        {% if is_paginated %}
+                        <nav aria-label="消耗记录分页">
+                            <ul class="pagination mb-0">
+                                {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="首页">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="上一页">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" aria-label="首页">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" aria-label="上一页">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for i in paginator.page_range %}
+                                    {% if page_obj.number == i %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ i }}</span>
+                                    </li>
+                                    {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ i }}</a>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="下一页">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="末页">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" aria-label="下一页">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" aria-label="末页">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- 消耗记录表格 - 项目视图 -->
+            <div class="card d-none" id="project-view-container">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-project-diagram me-2"></i>消耗记录列表 (按项目)</span>
+                    <div>
+                        <a href="{% url 'consumption_stats:export_excel' %}?view=project&{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-file-excel me-1"></i> 导出Excel
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0" id="project-view-content">
+                    <!-- 项目视图内容将通过JS动态生成 -->
+                    <div class="accordion" id="projectAccordion">
+                        <!-- 项目循环将在JS中生成 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 引用 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        // 定义全局变量，用于JS文件访问
+        const startDateDefault = '{{ start_date|date:"Y-m-d" }}';
+        const endDateDefault = '{{ end_date|date:"Y-m-d" }}';
+        const consumptionRecordsListUrl = '{% url "consumption_stats:consumption_records_list" %}';
+        const projectViewDataUrl = '{% url "consumption_stats:project_view_data" %}';
+        const searchProjectsUrl = '{% url "consumption_stats:search_projects" %}';
+        const searchTasksUrl = '{% url "consumption_stats:search_tasks" %}';
+    </script>
+    <script src="{% static 'consumption_management/js/consumption_records.js' %}"></script>
+    <script>
+        $(document).ready(function() {
+            // 初始化项目搜索框
+            $('#project').select2({
+                theme: 'bootstrap-5',
+                placeholder: '搜索项目...',
+                allowClear: true,
+                ajax: {
+                    url: searchProjectsUrl,
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            term: params.term || ''
+                        };
+                    },
+                    processResults: function(data) {
+                        return data;
+                    },
+                    cache: true
+                }
+            });
+
+            // 初始化任务搜索框
+            $('#task').select2({
+                theme: 'bootstrap-5',
+                placeholder: '搜索任务...',
+                allowClear: true,
+                ajax: {
+                    url: searchTasksUrl,
+                    dataType: 'json',
+                    delay: 250,
+                    data: function(params) {
+                        return {
+                            term: params.term || '',
+                            project_id: $('#project').val() || ''
+                        };
+                    },
+                    processResults: function(data) {
+                        return data;
+                    },
+                    cache: true
+                }
+            });
+
+            // 项目变化时清空任务选择
+            $('#project').on('change', function() {
+                $('#task').val(null).trigger('change');
+            });
+            
+            // 处理回流字段的内联编辑
+            $(document).on('click', '.edit-return-flow-btn', function(e) {
+                e.preventDefault();
+                const container = $(this).closest('.editable-field');
+                container.find('.editable-text, .edit-return-flow-btn').addClass('d-none');
+                container.find('.edit-form').removeClass('d-none');
+                container.find('.return-flow-input').focus();
+            });
+            
+            // 取消编辑按钮
+            $(document).on('click', '.cancel-edit-btn', function() {
+                const container = $(this).closest('.editable-field');
+                container.find('.edit-form').addClass('d-none');
+                container.find('.editable-text, .edit-return-flow-btn').removeClass('d-none');
+                
+                // 恢复原始值
+                const originalValue = container.find('.editable-text').text().trim();
+                container.find('.return-flow-input').val(originalValue);
+            });
+            
+            // 保存回流编辑
+            $(document).on('click', '.save-return-flow-btn', function() {
+                const container = $(this).closest('.editable-field');
+                const consumptionId = container.data('consumption-id');
+                const newReturnFlow = container.find('.return-flow-input').val();
+                const row = container.closest('tr');
+                
+                // 显示加载指示器
+                $(this).html('<i class="fas fa-spinner fa-spin"></i>');
+                $(this).prop('disabled', true);
+                
+                // 发送AJAX请求更新回流值
+                $.ajax({
+                    url: '/consumption/consumption/' + consumptionId + '/update-return-flow/',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ return_flow: newReturnFlow }),
+                    headers: {
+                        'X-CSRFToken': getCsrfToken()
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // 更新显示的值
+                            container.find('.editable-text').text(response.consumption.return_flow);
+                            container.find('.edit-form').addClass('d-none');
+                            container.find('.editable-text, .edit-return-flow-btn').removeClass('d-none');
+                            
+                            // 更新相关字段
+                            row.find('.actual-consumption-value').text(response.consumption.actual_consumption);
+                            row.find('.return-flow-ratio-value').text(response.consumption.return_flow_ratio);
+                            
+                            // 显示成功提示
+                            showToast('回流更新成功', 'success');
+                        } else {
+                            showToast('更新失败: ' + response.error, 'error');
+                        }
+                    },
+                    error: function(xhr) {
+                        let errorMessage = '更新失败';
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.error) {
+                                errorMessage = response.error;
+                            }
+                        } catch(e) {}
+                        showToast(errorMessage, 'error');
+                    },
+                    complete: function() {
+                        // 恢复按钮状态
+                        container.find('.save-return-flow-btn').html('<i class="fas fa-save"></i>');
+                        container.find('.save-return-flow-btn').prop('disabled', false);
+                    }
+                });
+            });
+            
+            // 回车键保存
+            $(document).on('keydown', '.return-flow-input', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    $(this).closest('.editable-field').find('.save-return-flow-btn').click();
+                }
+                else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    $(this).closest('.editable-field').find('.cancel-edit-btn').click();
+                }
+            });
+            
+            // 获取CSRF Token的辅助函数
+            function getCsrfToken() {
+                return document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+            }
+            
+            // 简单的Toast通知系统
+            function showToast(message, type) {
+                // 检查是否已有toast容器
+                let toastContainer = document.getElementById('toast-container');
+                if (!toastContainer) {
+                    toastContainer = document.createElement('div');
+                    toastContainer.id = 'toast-container';
+                    toastContainer.className = 'position-fixed bottom-0 end-0 p-3';
+                    document.body.appendChild(toastContainer);
+                }
+                
+                // 创建toast元素
+                const toastId = 'toast-' + Date.now();
+                const bgClass = type === 'success' ? 'bg-success' : 'bg-danger';
+                const toastHtml = `
+                    <div id="${toastId}" class="toast ${bgClass} text-white" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                ${message}
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="关闭"></button>
+                        </div>
+                    </div>
+                `;
+                
+                // 添加到容器
+                toastContainer.innerHTML += toastHtml;
+                
+                // 初始化并显示toast
+                const toastElement = document.getElementById(toastId);
+                const toast = new bootstrap.Toast(toastElement, {
+                    autohide: true,
+                    delay: 3000
+                });
+                toast.show();
+                
+                // 监听关闭事件，在关闭后移除元素
+                toastElement.addEventListener('hidden.bs.toast', function () {
+                    toastElement.remove();
+                });
+            }
+        });
+    </script>
+
+    <!-- 导入Excel模态框 -->
+    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importModalLabel">
+                        <i class="fas fa-file-import me-2"></i>导入消耗记录
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{% url 'consumption_stats:import_consumptions' %}" enctype="multipart/form-data" id="importForm">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="import_file" class="form-label">选择Excel文件</label>
+                            <input type="file" class="form-control" id="import_file" name="import_file" accept=".xlsx,.xls" required>
+                            <div class="form-text">仅支持.xlsx或.xls格式的Excel文件</div>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>导入须知：</strong>
+                            <ul class="mb-0 ps-3">
+                                <li>请确保Excel文件格式符合导入模板要求</li>
+                                <li>任务名称必须是系统中存在的任务</li>
+                                <li>日期格式必须为YYYY-MM-DD</li>
+                                <li>当日消耗必须大于0</li>
+                                <li>如果同一任务同一日期已有记录，系统会询问是否覆盖</li>
+                                <li>每个任务在同一天的记录数不能超过优化师数量</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'consumption_stats:download_import_template' %}" class="btn btn-outline-info">
+                                <i class="fas fa-file-download me-1"></i>下载导入模板
+                            </a>
+                            <div>
+                                <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">取消</button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-upload me-1"></i>上传并验证
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,400 @@
+body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background-color: #f5f7fa;
+    color: #333;
+    width: 100%;
+    overflow-x: hidden; /* 防止横向滚动条 */
+}
+
+html, body {
+    max-width: 100%;
+}
+
+.content-container {
+    padding: 1rem;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+    .content-container {
+        padding: 1.5rem;
+    }
+}
+
+@media (min-width: 992px) {
+    .content-container {
+        padding: 2rem;
+    }
+}
+
+/* 统计卡片 */
+.stats-summary-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%);
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    padding: 1rem;
+    border-left: 4px solid #4361ee;
+}
+
+.stats-card {
+    border-radius: 0.75rem;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.08);
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+    height: 100%;
+}
+
+.stats-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.total-card {
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    color: white;
+}
+
+.active-card {
+    background: linear-gradient(135deg, #43a047 0%, #66bb6a 100%);
+    color: white;
+}
+
+.pending-card {
+    background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+    color: white;
+}
+
+.completed-card {
+    background: linear-gradient(135deg, #26c6da 0%, #4dd0e1 100%);
+    color: white;
+}
+
+.stats-icon {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    font-size: 2.5rem;
+    opacity: 0.2;
+}
+
+/* 筛选卡片 */
+.filter-card {
+    background-color: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: none;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.filter-card .card-body {
+    padding: 1rem;
+}
+
+.filter-card .form-label {
+    margin-bottom: 0.25rem;
+    color: #6c757d;
+}
+
+.filter-card .input-group-text {
+    background-color: #f8f9fa;
+    border-right: none;
+}
+
+.filter-card .form-control {
+    border-left: none;
+}
+
+.filter-card .form-control:focus {
+    box-shadow: none;
+    border-color: #ced4da;
+}
+
+/* 项目表格卡片 */
+.project-table {
+    background-color: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border: none;
+    overflow: hidden;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.project-table .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #f1f1f1;
+    font-weight: 500;
+}
+
+/* 表格样式 */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    display: block;
+    max-width: 100%;
+}
+
+.table {
+    margin-bottom: 0;
+    width: 100%;
+    max-width: 100%;
+    table-layout: auto;
+}
+
+.table thead th {
+    background-color: #f8f9fa;
+    font-weight: 500;
+    border-top: none;
+    border-bottom: 2px solid #e9ecef;
+    color: #495057;
+    padding: 0.75rem 0.5rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.table tbody td {
+    padding: 0.75rem 0.5rem;
+    vertical-align: middle;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+/* 特定列的宽度控制 */
+.table th:first-child, .table td:first-child {
+    width: 40px;
+    min-width: 40px;
+    max-width: 40px;
+    text-align: center;
+}
+
+.table th:nth-child(2), .table td:nth-child(2) {
+    width: 60px;
+    min-width: 60px;
+    max-width: 60px;
+}
+
+.table th:nth-child(3), .table td:nth-child(3) {
+    min-width: 150px;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.card-footer {
+    background-color: #f8f9fa;
+    border-top: 1px solid #f1f1f1;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* 徽章样式 */
+.badge-status {
+    padding: 0.35em 0.65em;
+    border-radius: 12px;
+    font-weight: 500;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.badge-active {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge-completed {
+    background-color: #e0f7fa;
+    color: #006064;
+}
+
+.badge-paused {
+    background-color: #fff3e0;
+    color: #e65100;
+}
+
+/* 项目名称链接 */
+.project-name-link {
+    color: #1976d2;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.project-name-link:hover {
+    text-decoration: underline;
+    color: #0d47a1;
+}
+
+/* 分页 */
+.pagination {
+    justify-content: center;
+    margin-top: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.pagination .page-link {
+    color: #1976d2;
+    border-radius: 0.25rem;
+    margin: 0 0.125rem 0.125rem 0;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #1976d2;
+    border-color: #1976d2;
+}
+
+/* 空状态 */
+.empty-state {
+    padding: 2rem 0;
+    color: #6c757d;
+}
+
+/* 自定义复选框 */
+.form-check-input {
+    cursor: pointer;
+}
+
+/* Toast 通知 */
+.toast {
+    background-color: white;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 0.5rem;
+}
+
+.toast-header {
+    border-bottom: 1px solid #f1f1f1;
+    background-color: white;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+}
+
+/* 基础响应式调整 */
+.row {
+    width: 100%;
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.col, .col-md-4, .col-sm-6, .col-md-auto, .col-sm-12, .col-lg-4 {
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+/* 移动设备响应式调整 */
+@media (max-width: 767.98px) {
+    .table {
+        min-width: 800px; /* 在移动设备上表格最小宽度，允许水平滚动 */
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.5rem 0.4rem;
+        font-size: 0.875rem;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+    
+    .card-header, 
+    .card-footer {
+        padding: 0.75rem;
+    }
+    
+    .badge-status {
+        font-size: 0.7rem;
+    }
+    
+    /* 小屏幕设备下更紧凑的布局 */
+    .d-flex.gap-2 {
+        gap: 0.5rem !important;
+    }
+    
+    /* 确保按钮在小屏幕上换行显示良好 */
+    .btn-sm {
+        margin-bottom: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    /* 优化表格容器 */
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border: 0;
+    }
+    
+    /* 确保小屏幕上内容居中对齐 */
+    .d-flex.justify-content-between {
+        justify-content: center !important;
+        text-align: center;
+    }
+    
+    .d-flex.justify-content-between > * {
+        margin: 0.5rem 0;
+    }
+}
+
+/* 超小屏幕设备响应式调整 */
+@media (max-width: 575.98px) {
+    /* 超小屏幕下更紧凑的布局 */
+    .content-container {
+        padding: 0.5rem;
+    }
+    
+    .filter-card .card-body,
+    .project-table .card-body {
+        padding: 0.5rem;
+    }
+    
+    .table thead th,
+    .table tbody td {
+        padding: 0.375rem 0.3rem;
+        font-size: 0.8rem;
+    }
+    
+    /* 调整分页导航在超小屏幕上的显示 */
+    .pagination .page-item .page-link {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.75rem;
+        margin-bottom: 0.25rem;
+    }
+}
+
+/* 为移动设备优化滑动和触摸体验 */
+@media (any-pointer: coarse) {
+    .table-responsive::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+    
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 10px;
+    }
+    
+    .form-select, .form-control, button, a.btn {
+        min-height: 38px; /* 确保触摸目标足够大 */
+    }
+    
+    /* 增加表格行之间的间距，便于触摸 */
+    .table tbody tr {
+        border-bottom: 1px solid #f1f1f1;
+    }
+    
+    /* 使下拉菜单项更易触摸 */
+    .form-select option {
+        padding: 8px;
+    }
+} 

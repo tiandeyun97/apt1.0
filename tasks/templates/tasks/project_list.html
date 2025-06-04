@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+{% load humanize %}
+{% load static %}
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>项目列表</title>
+    <!-- Bootstrap 和第三方 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- 自定义 CSS -->
+    <link href="{% static 'tasks/css/project_list.css' %}" rel="stylesheet">
+</head>
+<body>
+
+    <div class="content-container">
+        <div class="container-fluid px-0">
+    
+            <!-- 筛选条件卡片 -->
+            <div class="card filter-card mb-4">
+                <div class="card-body py-3">
+                    <form method="get" action="{% url 'admin:tasks_project_changelist' %}" id="filter-form">
+                        <div class="row g-3 align-items-end">
+                            <div class="col-lg-4 col-md-6 col-sm-12">
+                                <label for="project_name" class="form-label small">项目名称</label>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                    <input type="text" class="form-control" id="project_name" name="q" value="{{ cl.query }}" placeholder="搜索项目...">
+                                </div>
+                            </div>
+                            <div class="col-md-auto col-sm-12 mt-3 mt-md-0">
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-search me-1"></i> 查询
+                                    </button>
+                                    <button type="reset" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-undo me-1"></i> 重置
+                                    </button>
+                                    <a href="{% url 'tasks:project_create' %}?next={{ request.get_full_path|urlencode }}" class="btn btn-sm btn-success">
+                                        <i class="fas fa-plus me-1"></i> 新建项目
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+      
+            <!-- 项目列表卡片 -->
+            <div class="card project-table">
+                <div class="card-header d-flex justify-content-between align-items-center py-2 flex-wrap">
+                    <span class="mb-2 mb-sm-0"><i class="fas fa-list me-2"></i>项目列表</span>
+                    <div>
+                        <button type="button" id="delete-selected" class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-trash-alt me-1"></i> 删除所选
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <!-- 响应式表格包装器 -->
+                    <div class="table-responsive">
+                        <form id="changelist-form" method="post" action="{% url 'admin:tasks_project_changelist' %}">
+                            {% csrf_token %}
+                            <table class="table table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">
+                                            <input type="checkbox" id="action-toggle" class="form-check-input">
+                                        </th>
+                                        <th>ID</th>
+                                        <th>项目名称</th>
+                                        <!-- 在小屏幕上隐藏部分列 -->
+                                        <th class="d-none d-md-table-cell">所属公司</th>
+                                        <th class="d-none d-md-table-cell">项目负责人</th>
+                                        <th class="d-none d-lg-table-cell">任务类型</th>
+                                        <th class="d-none d-lg-table-cell">媒体渠道</th>
+                                        <th>开始日期</th>
+                                        <th class="d-none d-md-table-cell">结束日期</th>
+                                        <th>项目状态</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for project in cl.result_list %}
+                                    <tr>
+                                        <td class="text-center">
+                                            <input type="checkbox" name="_selected_action" value="{{ project.pk }}" class="action-select form-check-input">
+                                        </td>
+                                        <td>{{ project.ProjectID }}</td>
+                                        <td>
+                                            <a href="{% url 'tasks:project_update' project.pk %}{% if request.GET %}?next={{ request.get_full_path|urlencode }}{% endif %}" class="project-name-link">
+                                                {{ project.ProjectName }}
+                                            </a>
+                                            <!-- 在小屏幕上显示简化信息 -->
+                                            <div class="d-md-none mt-1">
+                                                <small class="d-block text-muted">负责人: {{ project.ManagerID }}</small>
+                                                {% if project.Status2 %}
+                                                <span class="badge bg-light text-dark mt-1">{{ project.Status2.TaskStatusName }}</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <!-- 在小屏幕上隐藏部分列 -->
+                                        <td class="d-none d-md-table-cell">{{ project.CompanyID }}</td>
+                                        <td class="d-none d-md-table-cell">{{ project.ManagerID }}</td>
+                                        <td class="d-none d-lg-table-cell">
+                                            {% if project.TaskTypeID %}
+                                            <span class="badge bg-light text-dark">{{ project.TaskTypeID }}</span>
+                                            {% else %}
+                                            <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="d-none d-lg-table-cell">
+                                            {% if project.MediaChannelID %}
+                                            <span class="badge bg-light text-dark">{{ project.MediaChannelID }}</span>
+                                            {% else %}
+                                            <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ project.StartDate|date:"Y-m-d" }}</td>
+                                        <td class="d-none d-md-table-cell">{{ project.EndDate|date:"Y-m-d"|default:"-" }}</td>
+                                        <td class="d-none d-md-table-cell">
+                                            {% if project.Status2 %}
+                                            <span class="badge bg-light text-dark">{{ project.Status2.TaskStatusName }}</span>
+                                            {% else %}
+                                            <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="10" class="text-center py-4">
+                                            <div class="empty-state">
+                                                <i class="fas fa-search fa-2x mb-3 text-muted"></i>
+                                                <p class="mb-1">没有找到符合条件的项目</p>
+                                                <small class="text-muted">请尝试调整筛选条件</small>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
+                        <div class="d-flex flex-wrap align-items-center">
+                            <small class="text-muted me-3 mb-2 mb-md-0">共 {{ cl.result_count }} 个项目</small>
+                            
+                            {% if cl.paginator %}
+                            <div class="d-flex align-items-center flex-wrap">
+                                <small class="text-muted me-2 mb-2 mb-md-0">显示:</small>
+                                <form id="per-page-form" method="get" action="{% url 'admin:tasks_project_changelist' %}" class="mb-2 mb-md-0">
+                                    <!-- 保留当前所有查询参数，除了list_per_page和p -->
+                                    {% for key, value in cl.params.items %}
+                                        {% if key != 'list_per_page' and key != 'p' %}
+                                        <input type="hidden" name="{{ key }}" value="{{ value }}">
+                                        {% endif %}
+                                    {% endfor %}
+                                    <!-- 页面始终回到第1页 -->
+                                    <input type="hidden" name="p" value="1">
+                                    <!-- 使用onchange直接提交表单，不依赖jQuery -->
+                                    <select class="form-select form-select-sm" style="width: auto;" name="list_per_page" onchange="this.form.submit();">
+                                        <option value="10" {% if cl.list_per_page == 10 %}selected{% endif %}>10</option>
+                                        <option value="20" {% if cl.list_per_page == 20 %}selected{% endif %}>20</option>
+                                        <option value="50" {% if cl.list_per_page == 50 %}selected{% endif %}>50</option>
+                                        <option value="100" {% if cl.list_per_page == 100 %}selected{% endif %}>100</option>
+                                    </select>
+                                </form>
+                                <small class="text-muted ms-3">第 {{ cl.page_num }} 页，共 {{ cl.paginator.num_pages }} 页</small>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- 分页导航 -->
+                        {% if cl.paginator %}
+                        <nav aria-label="项目列表分页" class="mt-3 mt-md-0">
+                            <ul class="pagination pagination-sm mb-0 flex-wrap justify-content-center">
+                                <!-- 首页 -->
+                                <li class="page-item {% if cl.page_num == 1 %}disabled{% endif %}">
+                                    <a class="page-link" href="?p=1{% for k, v in cl.params.items %}{% if k != 'p' %}&{{ k }}={{ v }}{% endif %}{% endfor %}" aria-label="首页">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                
+                                <!-- 上一页 -->
+                                <li class="page-item {% if cl.page_num == 1 %}disabled{% endif %}">
+                                    <a class="page-link" href="{% if cl.page_num > 1 %}?p={{ cl.page_num|add:'-1' }}{% for k, v in cl.params.items %}{% if k != 'p' %}&{{ k }}={{ v }}{% endif %}{% endfor %}{% else %}javascript:void(0);{% endif %}" aria-label="上一页">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                
+                                <!-- 页码 -->
+                                {% for i in cl.paginator.page_range %}
+                                    {% if cl.page_num == i %}
+                                        <li class="page-item active">
+                                            <a class="page-link" href="javascript:void(0);">{{ i }}</a>
+                                        </li>
+                                    {% elif i > cl.page_num|add:'-3' and i < cl.page_num|add:'3' %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?p={{ i }}{% for k, v in cl.params.items %}{% if k != 'p' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">{{ i }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                <!-- 下一页 -->
+                                <li class="page-item {% if cl.page_num >= cl.paginator.num_pages %}disabled{% endif %}">
+                                    <a class="page-link" href="{% if cl.page_num < cl.paginator.num_pages %}?p={{ cl.page_num|add:'1' }}{% for k, v in cl.params.items %}{% if k != 'p' %}&{{ k }}={{ v }}{% endif %}{% endfor %}{% else %}javascript:void(0);{% endif %}" aria-label="下一页">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                
+                                <!-- 末页 -->
+                                <li class="page-item {% if cl.page_num >= cl.paginator.num_pages %}disabled{% endif %}">
+                                    <a class="page-link" href="{% if cl.page_num < cl.paginator.num_pages %}?p={{ cl.paginator.num_pages }}{% for k, v in cl.params.items %}{% if k != 'p' %}&{{ k }}={{ v }}{% endif %}{% endfor %}{% else %}javascript:void(0);{% endif %}" aria-label="末页">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 响应式设计的Toast容器 -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <!-- JavaScript 引用 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- 自定义 JS -->
+    <script>
+        // 传递Django URL到JS
+        var resetUrl = "{% url 'admin:tasks_project_changelist' %}";
+        // 使用当前URL作为删除表单提交地址
+        var deleteConfirmUrl = "{% url 'admin:tasks_project_changelist' %}";
+    </script>
+    <script src="{% static 'tasks/js/project_list.js' %}"></script>
+</body>
+</html> 

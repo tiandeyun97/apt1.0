@@ -1,0 +1,348 @@
+:root {
+    /* 主色调 - 清新蓝色系 */
+    --primary-color: #4361ee;
+    --primary-light: #4895ef;
+    --primary-dark: #3f37c9;
+    
+    /* 辅助色 - 渐变色调 */
+    --secondary-color: #4cc9f0;
+    --accent-color: #4895ef;
+    
+    /* 状态色 */
+    --success-color: #0ead69;
+    --warning-color: #f7b801;
+    --danger-color: #e63946;
+    --info-color: #4cc9f0;
+    
+    /* 中性色 */
+    --neutral-100: #f8f9fa;
+    --neutral-200: #e9ecef;
+    --neutral-300: #dee2e6;
+    --neutral-400: #ced4da;
+    --neutral-500: #adb5bd;
+    --neutral-600: #6c757d;
+    --neutral-700: #495057;
+    --neutral-800: #343a40;
+    --neutral-900: #212529;
+    
+    /* 背景色 */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f8f9fa;
+    --bg-tertiary: #e9ecef;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+body {
+    background-color: var(--bg-secondary);
+    color: var(--neutral-800);
+    font-family: 'Noto Sans SC', sans-serif;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+}
+
+.main-container {
+    flex: 1;
+    background: var(--bg-primary);
+    padding: 1.5rem;
+    height: 100vh;
+    overflow-y: auto;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.main-container::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.content-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--neutral-200);
+}
+
+.page-title {
+    color: var(--neutral-900);
+    font-weight: 700;
+    font-size: 1.75rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.page-title i {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
+
+.form-section {
+    background: var(--bg-primary);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--neutral-200);
+}
+
+.section-title {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.section-title i {
+    font-size: 1.25rem;
+}
+
+.form-label {
+    color: var(--neutral-700);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.form-control {
+    border-radius: 10px;
+    border: 1px solid var(--neutral-300);
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.2rem rgba(72, 149, 239, 0.1);
+}
+
+.form-control:disabled {
+    background-color: var(--neutral-100);
+    cursor: not-allowed;
+}
+
+.form-select {
+    border-radius: 10px;
+    border: 1px solid var(--neutral-300);
+    padding: 0.625rem 2.5rem 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    background-position: right 1rem center;
+}
+
+.form-select:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.2rem rgba(72, 149, 239, 0.1);
+}
+
+/* Select2 样式定制 */
+.select2-container--bootstrap-5 .select2-selection {
+    border-radius: 10px;
+    border: 1px solid var(--neutral-300);
+    min-height: 38px;
+    transition: all 0.3s ease;
+}
+
+.select2-container--bootstrap-5.select2-container--focus .select2-selection {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 0.2rem rgba(72, 149, 239, 0.1);
+}
+
+.select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice {
+    background-color: var(--primary-light);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.2rem 0.5rem;
+    margin: 0.2rem;
+}
+
+.select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove {
+    color: white;
+    margin-right: 0.3rem;
+    border: none;
+}
+
+.select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice__remove:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.select2-container--bootstrap-5 .select2-dropdown {
+    border-color: var(--neutral-300);
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.select2-container--bootstrap-5 .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--primary-light);
+}
+
+.select2-container--bootstrap-5 .select2-search--dropdown .select2-search__field {
+    border-radius: 6px;
+    border: 1px solid var(--neutral-300);
+    padding: 0.4rem;
+}
+
+.select2-container--bootstrap-5 .select2-search--dropdown .select2-search__field:focus {
+    border-color: var(--primary-light);
+    outline: none;
+}
+
+.btn {
+    border-radius: 12px;
+    padding: 0.625rem 1.25rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+    border: none;
+    box-shadow: 0 4px 15px rgba(67, 97, 238, 0.2);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-light), var(--primary-color));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(67, 97, 238, 0.3);
+}
+
+.btn-secondary {
+    background: var(--neutral-200);
+    border: none;
+    color: var(--neutral-700);
+}
+
+.btn-secondary:hover {
+    background: var(--neutral-300);
+    color: var(--neutral-800);
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--neutral-200);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.form-row:last-child {
+    margin-bottom: 0;
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-text {
+    color: var(--neutral-600);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.invalid-feedback {
+    color: var(--danger-color);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+.form-control.is-invalid {
+    border-color: var(--danger-color);
+}
+
+.form-control.is-invalid:focus {
+    box-shadow: 0 0 0 0.2rem rgba(230, 57, 70, 0.1);
+}
+
+textarea.form-control {
+    height: 5rem;
+    resize: none;
+}
+
+/* 项目选择器特定样式 */
+.select2-result-project {
+    padding: 8px;
+    border-bottom: 1px solid var(--neutral-200);
+}
+
+.select2-result-project:last-child {
+    border-bottom: none;
+}
+
+.select2-result-project__title {
+    color: var(--neutral-800);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.select2-container--bootstrap-5 .select2-results__option {
+    padding: 8px 12px;
+    transition: background-color 0.2s;
+}
+
+.select2-container--bootstrap-5 .select2-results__option:hover {
+    background-color: var(--neutral-100);
+}
+
+.select2-container--bootstrap-5 .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--primary-light);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .main-container {
+        padding: 1rem 0;
+    }
+    
+    .content-wrapper {
+        padding: 0 0.75rem;
+    }
+    
+    .form-section {
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 0.875rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+    }
+    
+    .select2-container--bootstrap-5 .select2-selection--multiple .select2-selection__choice {
+        margin: 0.15rem;
+        padding: 0.15rem 0.4rem;
+        font-size: 0.75rem;
+    }
+} 

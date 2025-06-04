@@ -1,0 +1,451 @@
+:root {
+    --primary-color: #2563eb;
+    --primary-light: #dbeafe;
+    --primary-dark: #1e40af;
+    --secondary-color: #475569;
+    --success-color: #059669;
+    --info-color: #0284c7;
+    --warning-color: #d97706;
+    --danger-color: #dc2626;
+    --light-gray: #f8fafc;
+    --border-color: #e2e8f0;
+}
+
+body {
+    font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+    background-color: #f1f5f9;
+    font-size: 14px;
+    color: #334155;
+    line-height: 1.6;
+}
+
+.navbar {
+    background-color: var(--primary-color);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    color: white;
+    font-size: 1.25rem;
+    padding: 0.5rem 0;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    margin-bottom: 24px;
+    overflow: hidden;
+}
+
+.card-header {
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color);
+    background-color: white;
+    padding: 1rem 1.5rem;
+    font-size: 16px;
+    color: var(--secondary-color);
+}
+
+.card-body {
+    padding: 1.5rem;
+    background-color: white;
+}
+
+.filter-card {
+    background-color: white;
+}
+
+/* 表单控件美化 */
+.form-control, .form-select {
+    border-radius: 8px;
+    border-color: #e5e7eb;
+    padding: 0.6rem 1rem;
+    font-size: 14px;
+    box-shadow: none;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.form-label {
+    font-weight: 500;
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+}
+
+/* 按钮样式 */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    padding: 0.6rem 1.25rem;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+}
+
+.btn-outline-secondary {
+    color: var(--secondary-color);
+    border-color: #cbd5e1;
+}
+
+.btn-outline-secondary:hover {
+    background-color: #f1f5f9;
+    color: var(--secondary-color);
+    border-color: #94a3b8;
+}
+
+/* 统计卡片美化 */
+.stats-card {
+    border-radius: 12px;
+    border: none;
+    transition: all 0.3s;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.stats-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background-color: currentColor;
+    opacity: 0.7;
+}
+
+.stats-card .card-body {
+    padding: 1.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.stats-card .stats-icon {
+    position: absolute;
+    bottom: -15px;
+    right: -15px;
+    font-size: 4rem;
+    opacity: 0.07;
+    color: currentColor;
+}
+
+.stats-card h6 {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 0.75rem;
+}
+
+.stats-card h3 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 0;
+}
+
+.stats-card.total-card {
+    color: var(--primary-color);
+    background-color: #eff6ff;
+}
+
+.stats-card.current-card {
+    color: var(--success-color);
+    background-color: #ecfdf5;
+}
+
+.stats-card.prev-card {
+    color: var(--info-color);
+    background-color: #f0f9ff;
+}
+
+.stats-card.today-card {
+    color: #8b5cf6;
+    background-color: #f5f3ff;
+}
+
+.stats-card.yesterday-card {
+    color: #ec4899;
+    background-color: #fdf2f8;
+}
+
+/* 表格样式优化 */
+.table-container {
+    border-radius: 8px;
+    overflow: hidden;
+    background-color: white;
+}
+
+.table {
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table th {
+    background-color: #f8fafc;
+    font-weight: 600;
+    font-size: 13px;
+    color: #475569;
+    text-align: center;
+    padding: 12px 8px;
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.table td {
+    padding: 12px 8px;
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 13px;
+}
+
+.table tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+.table a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.table a:hover {
+    text-decoration: underline;
+}
+
+.summary-row {
+    font-weight: 600;
+    background-color: #f1f5f9;
+}
+
+.summary-row td {
+    border-top: 2px solid #e2e8f0;
+}
+
+.fixed-summary-container .summary-row {
+    font-weight: 600;
+    background-color: #f8fafc;
+}
+
+.fixed-summary-container .summary-row td:first-child {
+    border-left: 1px solid #e2e8f0;
+}
+
+.fixed-summary-container .summary-row td:last-child {
+    border-right: 1px solid #e2e8f0;
+}
+
+.ellipsis {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+}
+
+/* 响应式调整 */
+@media (max-width: 1200px) {
+    .table th, .table td {
+        padding: 8px 4px;
+        font-size: 12px;
+    }
+    
+    .mobile-hide {
+        display: none;
+    }
+    
+    .ellipsis {
+        max-width: 120px;
+    }
+}
+
+@media (max-width: 992px) {
+    .ellipsis {
+        max-width: 100px;
+    }
+    
+    .stats-card h3 {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .card-header {
+        padding: 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .table-responsive {
+        max-height: 500px;
+    }
+}
+
+/* 固定合计行样式 */
+.fixed-summary-container {
+    position: sticky;
+    bottom: 0;
+    width: 100%;
+    background-color: white;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
+    z-index: 100;
+}
+
+.summary-table {
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.summary-table td {
+    padding: 12px 8px;
+    text-align: center;
+    vertical-align: middle;
+    border-top: 2px solid #e2e8f0;
+    font-size: 13px;
+}
+
+/* 导出按钮美化 */
+.export-btn {
+    transition: all 0.2s;
+}
+
+.export-btn:hover {
+    background-color: #f8fafc;
+    color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+/* 页面内容容器 */
+.content-container {
+    padding: 1.5rem;
+}
+
+/* 页头样式 */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1rem 0.5rem;
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+/* 导航 */
+.nav-header {
+    background-color: var(--primary-color);
+    padding: 1rem 1.5rem;
+    color: white;
+}
+
+.breadcrumb {
+    margin-bottom: 0;
+}
+
+.breadcrumb-item a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+}
+
+.breadcrumb-item.active {
+    color: white;
+    font-weight: 500;
+}
+
+.breadcrumb-item+.breadcrumb-item::before {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* 项目视图样式 */
+.accordion-button:not(.collapsed) {
+    background-color: #eff6ff;
+    color: var(--primary-color);
+}
+
+.accordion-button:focus {
+    box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+}
+
+.task-header {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.task-header:hover {
+    background-color: #f8fafc;
+}
+
+.task-content {
+    border-top: 1px solid #e2e8f0;
+}
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.task-link {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s;
+    display: inline-block;
+    position: relative;
+}
+
+.task-link:hover {
+    color: var(--primary-dark);
+    text-decoration: none;
+}
+
+.task-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background-color: var(--primary-color);
+    transition: width 0.2s ease;
+}
+
+.task-link:hover::after {
+    width: 100%;
+} 

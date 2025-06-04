@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>消耗趋势分析</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Flatpickr日期选择器 -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/flatpickr/4.6.13/flatpickr.min.css" rel="stylesheet">
+    <!-- 自定义CSS -->
+    <link href="{% static 'data_analysis/css/consumption_trend.css' %}" rel="stylesheet">
+</head>
+<body>
+    <div class="main-container">
+        <!-- 页面标题 -->
+        <h1 class="page-title">
+            <i class="fas fa-chart-line"></i> 消耗趋势分析
+        </h1>
+        
+        <!-- 时间段选择标签页 -->
+        <div class="tab-container">
+            <ul class="nav nav-tabs" id="periodTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="week-tab" data-bs-toggle="tab" data-bs-target="#week-tab-pane" type="button" role="tab" aria-controls="week-tab-pane" aria-selected="true">本周</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="month-tab" data-bs-toggle="tab" data-bs-target="#month-tab-pane" type="button" role="tab" aria-controls="month-tab-pane" aria-selected="false">本月</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="yearly-tab" data-bs-toggle="tab" data-bs-target="#yearly-tab-pane" type="button" role="tab" aria-controls="yearly-tab-pane" aria-selected="false">月度</button>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- 标签页内容 -->
+        <div class="tab-content" id="periodTabContent">
+            <!-- 本周数据 -->
+            <div class="tab-pane fade show active" id="week-tab-pane" role="tabpanel" aria-labelledby="week-tab" tabindex="0">
+                <!-- 统计卡片 -->
+                <div class="stats-row" id="week-stats">
+                    <div class="loading-spinner" id="week-stats-loading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">本周消耗与回流趋势</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" id="weekConsumptionChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">本周成本趋势</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" id="weekCostChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">消耗趋势分析洞察</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="insight-container" id="weekInsights">
+                                    <div class="loading-spinner">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">加载中...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 本月数据 -->
+            <div class="tab-pane fade" id="month-tab-pane" role="tabpanel" aria-labelledby="month-tab" tabindex="0">
+                <!-- 日期范围选择器 -->
+                <div class="date-range-selector mb-3">
+                    <div class="card">
+                        <div class="card-body py-3">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-md-7">
+                                    <label for="month-date-range-picker" class="form-label mb-1"><i class="fas fa-calendar-alt me-1"></i> 选择日期范围:</label>
+                                    <input type="text" id="month-date-range-picker" class="form-control form-control-sm" placeholder="选择日期范围">
+                                    <small class="text-muted">最多可选择62天的数据</small>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="d-flex align-items-end" style="height: 100%;">
+                                        <div class="btn-group w-100">
+                                            <button id="month-search-btn" class="btn btn-primary btn-sm">
+                                                <i class="fas fa-search me-1"></i> 查询
+                                            </button>
+                                            <button id="month-reset-btn" class="btn btn-outline-secondary btn-sm">
+                                                <i class="fas fa-undo me-1"></i> 重置
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 统计卡片 -->
+                <div class="stats-row" id="month-stats">
+                    <div class="loading-spinner" id="month-stats-loading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">本月消耗与回流趋势</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" id="monthConsumptionChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">本月成本趋势</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" id="monthCostChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">消耗趋势分析洞察</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="insight-container" id="monthInsights">
+                                    <div class="loading-spinner">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">加载中...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 月度数据 -->
+            <div class="tab-pane fade" id="yearly-tab-pane" role="tabpanel" aria-labelledby="yearly-tab" tabindex="0">
+                <!-- 统计卡片 -->
+                <div class="stats-row" id="yearly-stats">
+                    <div class="loading-spinner" id="yearly-stats-loading">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">加载中...</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">年度月度消耗与回流趋势</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" id="yearlyConsumptionChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">年度月度成本趋势</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" id="yearlyCostChart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">消耗趋势分析洞察</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="insight-container" id="yearlyInsights">
+                                    <div class="loading-spinner">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">加载中...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 数据URL和CSRF令牌 -->
+    <div id="data-url" data-url="{% url 'admin:get_consumption_data' %}" style="display: none;"></div>
+    {% csrf_token %}
+
+    <!-- jQuery -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <!-- Flatpickr日期选择器 -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/flatpickr/4.6.13/l10n/zh.min.js"></script>
+    <!-- ECharts -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/echarts/5.3.3/echarts.min.js"></script>
+    <!-- 消耗趋势分析JS -->
+    <script src="{% static 'data_analysis/js/consumption_trend.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <style type="text/css">
+    .stats-container {
+      margin: 20px 0;
+    }
+    .stats-section {
+      margin-bottom: 30px;
+    }
+    .stats-title {
+      font-size: 18px;
+      margin-bottom: 10px;
+      padding: 5px 10px;
+      background-color: #417690;
+      color: white;
+      border-radius: 3px;
+    }
+    .date-filter {
+      margin: 20px 0;
+      padding: 15px;
+      background-color: #f8f8f8;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+    }
+    .date-filter label {
+      margin-right: 10px;
+    }
+    .summary-box {
+      background-color: #f8f8f8;
+      padding: 15px;
+      border-radius: 5px;
+      border: 1px solid #ddd;
+      margin-bottom: 20px;
+    }
+    .summary-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .summary-stats {
+      display: flex;
+      justify-content: space-between;
+    }
+    .summary-stat {
+      padding: 10px;
+      background-color: white;
+      border-radius: 5px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      min-width: 200px;
+      text-align: center;
+    }
+    .back-link {
+      margin-bottom: 20px;
+    }
+  </style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+  &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+  &rsaquo; <a href="{% url 'admin:consumption_records_consumptionrecord_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+  &rsaquo; {% trans 'Statistics' %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+  <div class="back-link">
+    <a href="{% url 'admin:consumption_records_consumptionrecord_changelist' %}" class="button">
+      {% trans "返回消耗记录列表" %}
+    </a>
+  </div>
+
+  <h1>消耗记录统计分析</h1>
+
+  <div class="date-filter">
+    <form method="get">
+      <label for="start_date">开始日期:</label>
+      <input type="date" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+      
+      <label for="end_date">结束日期:</label>
+      <input type="date" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+      
+      <input type="submit" value="筛选" class="button">
+    </form>
+  </div>
+
+  <div class="summary-box">
+    <div class="summary-title">汇总数据 ({{ start_date|date:'Y-m-d' }} 至 {{ end_date|date:'Y-m-d' }})</div>
+    <div class="summary-stats">
+      <div class="summary-stat">
+        <div>总当日消耗</div>
+        <div style="font-size: 18px; margin-top: 5px;">{{ summary.total_daily_consumption|floatformat:2 }}</div>
+      </div>
+      <div class="summary-stat">
+        <div>总回流</div>
+        <div style="font-size: 18px; margin-top: 5px;">{{ summary.total_refund|floatformat:2 }}</div>
+      </div>
+      <div class="summary-stat">
+        <div>总实际消耗</div>
+        <div style="font-size: 18px; margin-top: 5px;">{{ summary.total_actual_consumption|floatformat:2 }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-container">
+    <!-- 按任务名称分组 -->
+    <div class="stats-section">
+      <div class="stats-title">按任务名称分组</div>
+      <table>
+        <thead>
+          <tr>
+            <th>任务名称</th>
+            <th>当日消耗</th>
+            <th>回流</th>
+            <th>实际消耗</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in by_task %}
+          <tr>
+            <td>{{ item.task_name }}</td>
+            <td>{{ item.total_daily_consumption|floatformat:2 }}</td>
+            <td>{{ item.total_refund|floatformat:2 }}</td>
+            <td>{{ item.total_actual_consumption|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 按项目名称分组 -->
+    <div class="stats-section">
+      <div class="stats-title">按项目名称分组</div>
+      <table>
+        <thead>
+          <tr>
+            <th>项目名称</th>
+            <th>当日消耗</th>
+            <th>回流</th>
+            <th>实际消耗</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in by_project %}
+          <tr>
+            <td>{{ item.project_name }}</td>
+            <td>{{ item.total_daily_consumption|floatformat:2 }}</td>
+            <td>{{ item.total_refund|floatformat:2 }}</td>
+            <td>{{ item.total_actual_consumption|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 按优化师分组 -->
+    <div class="stats-section">
+      <div class="stats-title">按优化师分组</div>
+      <table>
+        <thead>
+          <tr>
+            <th>优化师</th>
+            <th>当日消耗</th>
+            <th>回流</th>
+            <th>实际消耗</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in by_optimizer %}
+          <tr>
+            <td>{{ item.optimizer }}</td>
+            <td>{{ item.total_daily_consumption|floatformat:2 }}</td>
+            <td>{{ item.total_refund|floatformat:2 }}</td>
+            <td>{{ item.total_actual_consumption|floatformat:2 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %} 

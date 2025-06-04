@@ -1,0 +1,79 @@
+/* 任务状态颜色定义 */
+/* 用于全局任务状态颜色的公共样式表 */
+
+/* 状态颜色 */
+.status-in-progress {
+  background-color: #017847 !important;
+}
+
+.status-pending-reconciliation {
+  background-color: #ffd455 !important;
+  color: #212529 !important; /* 浅色背景使用深色文字 */
+}
+
+.status-waiting-to-start {
+  background-color: #eed4fc !important;
+  color: #212529 !important; /* 浅色背景使用深色文字 */
+}
+
+.status-paused {
+  background-color: #b81821 !important;
+}
+
+.status-ended-pending-reconciliation {
+  background-color: #cce0ea !important;
+  color: #212529 !important; /* 浅色背景使用深色文字 */
+}
+
+.status-ended-reconciliation-complete {
+  background-color: #fdd0cd !important;
+  color: #212529 !important; /* 浅色背景使用深色文字 */
+}
+
+.status-waiting-for-notification {
+  background-color: #d5f9bb !important;
+  color: #212529 !important; /* 浅色背景使用深色文字 */
+}
+
+/* 为了兼容Bootstrap的徽章类 */
+.badge.status-in-progress,
+.bg-status-in-progress {
+  background-color: #017847 !important;
+  color: white;
+}
+
+.badge.status-pending-reconciliation,
+.bg-status-pending-reconciliation {
+  background-color: #ffd455 !important;
+  color: #212529;
+}
+
+.badge.status-waiting-to-start,
+.bg-status-waiting-to-start {
+  background-color: #eed4fc !important;
+  color: #212529;
+}
+
+.badge.status-paused,
+.bg-status-paused {
+  background-color: #b81821 !important;
+  color: white;
+}
+
+.badge.status-ended-pending-reconciliation,
+.bg-status-ended-pending-reconciliation {
+  background-color: #cce0ea !important;
+  color: #212529;
+}
+
+.badge.status-ended-reconciliation-complete,
+.bg-status-ended-reconciliation-complete {
+  background-color: #fdd0cd !important;
+  color: #212529;
+}
+
+.badge.status-waiting-for-notification,
+.bg-status-waiting-for-notification {
+  background-color: #d5f9bb !important;
+  color: #212529;
+} 

@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+{% load static %}
+{% load i18n %}
+{% load auth_extras %}
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>像素列表</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <!-- 自定义CSS -->
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f8f9fc;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        .main-container {
+            padding: 20px;
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e3e6f0;
+        }
+        
+        .page-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+            color: #2c3e50;
+        }
+        
+        .page-title i {
+            margin-right: 10px;
+            color: #4e73df;
+        }
+        
+        .search-form {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            padding: 20px;
+            margin-bottom: 1rem;
+        }
+        
+        .form-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4e73df;
+            margin-bottom: 0.3rem;
+        }
+        
+        .form-control, .form-select {
+            font-size: 13px;
+            height: 35px;
+            padding: 0.375rem 0.75rem;
+        }
+        
+        .search-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .search-buttons .btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        
+        .table {
+            margin-bottom: 0;
+        }
+        
+        .table thead th {
+            background-color: #f8f9fc;
+            border-bottom: 2px solid #e3e6f0;
+            font-weight: 600;
+            color: #4e73df;
+            font-size: 13px;
+            padding: 0.75rem;
+            white-space: nowrap;
+        }
+        
+        .table tbody td {
+            font-size: 13px;
+            padding: 0.75rem;
+            vertical-align: middle;
+            border-color: #e3e6f0;
+        }
+        
+        .table .btn-group .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 12px;
+        }
+        
+        .badge {
+            font-size: 12px;
+            padding: 0.25em 0.6em;
+        }
+        
+        .pagination-container {
+            background-color: #fff;
+            padding: 1rem;
+            border-top: 1px solid #e3e6f0;
+            margin-top: -1px;
+        }
+        
+        .pagination {
+            margin: 0;
+            display: flex;
+            gap: 0.25rem;
+        }
+        
+        .pagination .page-item .page-link {
+            border-radius: 0.25rem;
+            padding: 0.375rem 0.75rem;
+            color: #4e73df;
+            background-color: #fff;
+            border: 1px solid #e3e6f0;
+            min-width: 32px;
+            text-align: center;
+            line-height: 1.25;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: #4e73df;
+            border-color: #4e73df;
+            color: #fff;
+            font-weight: 500;
+        }
+        
+        .pagination .page-item .page-link:hover {
+            background-color: #eaecf4;
+            border-color: #e3e6f0;
+            color: #2e59d9;
+        }
+        
+        .pagination-info {
+            color: #6e707e;
+            font-size: 0.875rem;
+        }
+        
+        .per-page-selector select {
+            min-width: 70px;
+            height: 31px;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .tooltip {
+            font-size: 12px;
+        }
+        
+        .tooltip-inner {
+            max-width: 300px;
+            padding: 0.5rem;
+            background-color: #fff;
+            color: #333;
+            border: 1px solid #e3e6f0;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+        
+        .table-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        .btn {
+            font-weight: 600;
+            padding: 0.375rem 1rem;
+            border-radius: 4px;
+        }
+        
+        .btn-primary {
+            background-color: #4e73df;
+            border-color: #4e73df;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2e59d9;
+            border-color: #2653d4;
+        }
+        
+        .alert {
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .pagination .page-item.disabled .page-link {
+            color: #6c757d;
+            background-color: #f8f9fa;
+        }
+        
+        .pagination .page-item.active .page-link:hover {
+            background-color: #0b5ed7;
+            border-color: #0a58ca;
+            color: white;
+        }
+        
+        .pagination {
+            margin-bottom: 0 !important;
+        }
+        
+        .remark-icon {
+            cursor: help;
+            transition: all 0.2s;
+        }
+        
+        .remark-icon:hover {
+            color: #0f7a8a;
+        }
+        
+        .status-badge-authorized {
+            background-color: #1cc88a;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .status-badge-unauthorized {
+            background-color: #e74a3b;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .status-badge-authorized:hover {
+            background-color: #169872;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        .status-badge-unauthorized:hover {
+            background-color: #c23b2e;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        .modal-header {
+            background-color: #f8f9fc;
+            border-bottom: 1px solid #e3e6f0;
+        }
+        
+        .modal-title {
+            color: #4e73df;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .modal-content {
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <!-- CSRF令牌 - 用于AJAX请求 -->
+    {% csrf_token %}
+    
+    <div class="main-container fade-in">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" id="message-alert">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %} me-2"></i>
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <div class="page-header">
+            <h2 class="page-title">
+                <i class="fas fa-fingerprint"></i>
+                像素列表
+            </h2>
+            <div class="d-flex gap-2">
+                {% if perms.pixel_management.add_pixel %}
+                <a href="{% url 'pixel_management:pixel_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    新建像素
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 搜索表单 -->
+        <div class="search-form">
+            <form method="get" class="mb-0">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label for="pixel_id" class="form-label">像素ID</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-fingerprint"></i></span>
+                            <input type="number" class="form-control" id="pixel_id" name="pixel_id" 
+                                value="{{ request.GET.pixel_id }}" placeholder="搜索像素ID">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="task" class="form-label">关联任务</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-tasks"></i></span>
+                            <input type="text" class="form-control" id="task" name="task" 
+                                value="{{ request.GET.task }}" placeholder="搜索任务名称">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="account" class="form-label">账户</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="account" name="account" 
+                                value="{{ request.GET.account }}" placeholder="搜索账户">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="is_authorized" class="form-label">授权状态</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <select class="form-select" id="is_authorized" name="is_authorized">
+                                <option value="">全部</option>
+                                <option value="True" {% if request.GET.is_authorized == 'True' %}selected{% endif %}>已授权</option>
+                                <option value="False" {% if request.GET.is_authorized == 'False' %}selected{% endif %}>未授权</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-12 d-flex justify-content-end">
+                        <div class="search-buttons">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-1"></i>
+                                搜索
+                            </button>
+                            <a href="?" class="btn btn-secondary">
+                                <i class="fas fa-sync-alt me-1"></i>
+                                重置
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="per_page" value="{{ request.GET.per_page|default:20 }}">
+            </form>
+        </div>
+
+        {% if page_obj %}
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th width="60">序号</th>
+                            <th>像素ID</th>
+                            <th>关联任务</th>
+                            <th>BM_ID</th>
+                            <th>账户</th>
+                            <th>时区</th>
+                            <th width="100">授权状态</th>
+                            <th>创建人</th>
+                            <th width="150">创建时间</th>
+                            <th width="60">备注</th>
+                            <th width="100">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pixel in page_obj %}
+                        <tr>
+                            <td class="text-center">{{ forloop.counter|add:page_obj.start_index|add:-1 }}</td>
+                            <td>{{ pixel.pixel_id }}</td>
+                            <td>{{ pixel.task.name }}</td>
+                            <td>{{ pixel.bm_id }}</td>
+                            <td>{{ pixel.account|default:"-" }}</td>
+                            <td>{{ pixel.timezone|default:"-" }}</td>
+                            <td class="text-center">
+                                <span class="badge {% if pixel.is_authorized %}status-badge-authorized{% else %}status-badge-unauthorized{% endif %} {% if perms.pixel_management.change_pixel %}auth-toggle-btn{% endif %}" 
+                                      {% if perms.pixel_management.change_pixel %}data-pixel-id="{{ pixel.pk }}" 
+                                      data-bs-toggle="tooltip" 
+                                      data-bs-placement="top"
+                                      title="点击切换授权状态" 
+                                      style="cursor: pointer;"{% endif %}>
+                                    {{ pixel.get_is_authorized_display }}
+                                </span>
+                            </td>
+                            <td>{{ pixel.creator.username }}</td>
+                            <td>{{ pixel.created_at|date:"Y-m-d H:i" }}</td>
+                            <td class="text-center">
+                                {% if pixel.notes %}
+                                <i class="fas fa-info-circle text-info" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="left" 
+                                   title="{{ pixel.notes }}"></i>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <a href="{% url 'pixel_management:pixel_detail' pixel.pk %}" 
+                                       class="btn btn-sm btn-info" title="查看详情">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    {% if perms.pixel_management.change_pixel %}
+                                    <a href="{% url 'pixel_management:pixel_edit' pixel.pk %}" 
+                                        class="btn btn-sm btn-primary" title="编辑">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% endif %}
+                                    {% if perms.pixel_management.delete_pixel %}
+                                    <button type="button" class="btn btn-sm btn-danger delete-pixel-btn" 
+                                            data-pixel-id="{{ pixel.pk }}" title="删除">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="11" class="text-center">暂无数据</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- 分页 -->
+            <div class="pagination-container">
+                <div class="d-flex align-items-center justify-content-between w-100">
+                    <div class="d-flex align-items-center">
+                        <div class="per-page-selector d-flex align-items-center me-3">
+                            <label for="per_page" class="mb-0 me-2">每页显示：</label>
+                            <select class="form-select form-select-sm" id="per_page" style="width: 70px;">
+                                <option value="10" {% if request.GET.per_page == '10' %}selected{% endif %}>10</option>
+                                <option value="20" {% if request.GET.per_page == '20' or not request.GET.per_page %}selected{% endif %}>20</option>
+                                <option value="50" {% if request.GET.per_page == '50' %}selected{% endif %}>50</option>
+                                <option value="100" {% if request.GET.per_page == '100' %}selected{% endif %}>100</option>
+                            </select>
+                        </div>
+                        <div class="pagination-info">
+                            显示 {{ page_obj.start_index }} 到 {{ page_obj.end_index }} 条，共 {{ page_obj.paginator.count }} 条记录
+                        </div>
+                    </div>
+                    
+                    <!-- 分页按钮 -->
+                    <div class="d-flex align-items-center">
+                        <nav aria-label="分页导航">
+                            <ul class="pagination mb-0">
+                                {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+                                
+                                {% for i in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == i %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ i }}</span>
+                                    </li>
+                                    {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ i }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ i }}</a>
+                                    </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key,value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            没有找到匹配的记录
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // 初始化工具提示
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl, {
+                    html: true
+                });
+            });
+
+            // 自动隐藏提示框
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 3000);
+
+            // 监听每页显示数量的变化
+            $('#per_page').on('change', function() {
+                var value = $(this).val();
+                var currentUrl = new URL(window.location.href);
+                var searchParams = currentUrl.searchParams;
+                searchParams.set('per_page', value);
+                searchParams.delete('page');  // 重置页码
+                window.location.href = currentUrl.toString();
+            });
+            
+            // 授权状态切换按钮点击事件
+            $('.auth-toggle-btn').on('click', function() {
+                const pixelId = $(this).data('pixel-id');
+                const btn = $(this);
+                const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+                
+                // 显示加载状态
+                const originalText = btn.text();
+                btn.html('<i class="fas fa-spinner fa-spin"></i>');
+                
+                // 发送AJAX请求
+                $.ajax({
+                    url: `{% url 'pixel_management:toggle_authorization' 0 %}`.replace('0', pixelId),
+                    type: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
+                    success: function(response) {
+                        // 更新按钮状态和文本
+                        if (response.is_authorized) {
+                            btn.removeClass('status-badge-unauthorized').addClass('status-badge-authorized');
+                        } else {
+                            btn.removeClass('status-badge-authorized').addClass('status-badge-unauthorized');
+                        }
+                        btn.text(response.display_status);
+                        
+                        // 重新初始化工具提示
+                        const tooltip = bootstrap.Tooltip.getInstance(btn);
+                        if (tooltip) {
+                            tooltip.dispose();
+                        }
+                        new bootstrap.Tooltip(btn, {
+                            html: true
+                        });
+                        
+                        // 显示成功消息
+                        const alertHtml = `
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <i class="fas fa-check-circle me-2"></i>
+                                像素 #${pixelId} ${response.message}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        `;
+                        $('.main-container').prepend(alertHtml);
+                        
+                        // 3秒后自动关闭
+                        setTimeout(function() {
+                            $('.alert').alert('close');
+                        }, 3000);
+                    },
+                    error: function(xhr) {
+                        // 恢复按钮状态
+                        btn.text(originalText);
+                        
+                        // 显示错误信息
+                        let errorMsg = '操作失败，请稍后重试';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+                        
+                        const alertHtml = `
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="fas fa-exclamation-circle me-2"></i>
+                                ${errorMsg}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        `;
+                        $('.main-container').prepend(alertHtml);
+                        
+                        // 3秒后自动关闭
+                        setTimeout(function() {
+                            $('.alert').alert('close');
+                        }, 3000);
+                    }
+                });
+            });
+            
+            // 删除像素按钮点击事件
+            $('.delete-pixel-btn').on('click', function() {
+                const pixelId = $(this).data('pixel-id');
+                const btn = $(this);
+                const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+                
+                if (confirm('确定要删除此像素吗？此操作无法撤销。')) {
+                    // 显示加载状态
+                    btn.html('<i class="fas fa-spinner fa-spin"></i>');
+                    btn.prop('disabled', true);
+                    
+                    // 发送AJAX请求
+                    $.ajax({
+                        url: `{% url 'pixel_management:pixel_delete' 0 %}`.replace('0', pixelId),
+                        type: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken
+                        },
+                        success: function(response) {
+                            // 删除成功，移除该行
+                            btn.closest('tr').fadeOut(300, function() {
+                                $(this).remove();
+                                
+                                // 如果表格为空，显示无数据提示
+                                if ($('table tbody tr').length === 0) {
+                                    $('table tbody').html('<tr><td colspan="11" class="text-center">暂无数据</td></tr>');
+                                }
+                            });
+                            
+                            // 显示成功消息
+                            const alertHtml = `
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    ${response.message}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            `;
+                            $('.main-container').prepend(alertHtml);
+                            
+                            // 3秒后自动关闭
+                            setTimeout(function() {
+                                $('.alert').alert('close');
+                            }, 3000);
+                        },
+                        error: function(xhr) {
+                            // 恢复按钮状态
+                            btn.html('<i class="fas fa-trash"></i>');
+                            btn.prop('disabled', false);
+                            
+                            // 显示错误信息
+                            let errorMsg = '删除失败，请稍后重试';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMsg = xhr.responseJSON.message;
+                            }
+                            
+                            const alertHtml = `
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                    ${errorMsg}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            `;
+                            $('.main-container').prepend(alertHtml);
+                            
+                            // 3秒后自动关闭
+                            setTimeout(function() {
+                                $('.alert').alert('close');
+                            }, 3000);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

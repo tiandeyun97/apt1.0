@@ -1,0 +1,112 @@
+/* 提醒弹窗样式 */
+.reminder-modal .modal-content {
+    border-radius: 16px;
+    border: none;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.reminder-modal .modal-header {
+    padding: 1rem 1rem 0.5rem;
+    background-color: transparent;
+}
+
+.reminder-modal .btn-close {
+    margin: -0.5rem -0.5rem -0.5rem auto;
+    opacity: 0.5;
+}
+
+.reminder-modal .modal-body {
+    padding: 1rem 1.5rem;
+}
+
+.reminder-modal .icon-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4285f4, #2563eb);
+    margin-bottom: 1rem;
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+}
+
+.reminder-modal .reminder-icon {
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.reminder-modal .reminder-icon i {
+    font-size: 2.5rem;
+    color: white;
+    transform: rotate(0deg);
+    margin: 0;
+    line-height: 1;
+}
+
+.reminder-modal .reminder-title {
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.75rem;
+}
+
+.reminder-modal .reminder-text {
+    font-size: 1.1rem;
+    color: #64748b;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.reminder-modal .dont-show-again {
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+.reminder-modal .btn-primary {
+    background: linear-gradient(135deg, #4285f4, #2563eb);
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.reminder-modal .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+}
+
+.reminder-modal .form-check-input:checked {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+/* 手动预览按钮样式 */
+#previewReminderButton {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1050;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, #4285f4, #2563eb);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#previewReminderButton:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 6px 16px rgba(37, 99, 235, 0.6);
+}
+
+#previewReminderButton i {
+    font-size: 1.3rem;
+    transform: rotate(0deg);
+    margin: 0;
+}

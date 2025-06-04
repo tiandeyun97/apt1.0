@@ -1,0 +1,169 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrahead %}
+    {{ block.super }}
+    {{ media }}
+{% endblock %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <style>
+        .delete-confirmation {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+            padding: 24px;
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .delete-icon {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .delete-icon i {
+            font-size: 48px;
+            color: #dc3545;
+        }
+        .delete-title {
+            font-size: 18px;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        .delete-warning {
+            background: #fff3f3;
+            border: 1px solid #ffcdd2;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 20px;
+            color: #d32f2f;
+        }
+        .related-items {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        .related-items h3 {
+            color: #495057;
+            font-size: 16px;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        .related-items ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .related-items li {
+            color: #666;
+            margin-bottom: 6px;
+        }
+        .button-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        .btn-delete:hover {
+            background: #c82333;
+        }
+        .btn-cancel {
+            background: #f8f9fa;
+            color: #495057;
+            border: 1px solid #ddd;
+            padding: 10px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        .btn-cancel:hover {
+            background: #e9ecef;
+            color: #212529;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+<div class="delete-confirmation">
+    {% if perms_lacking %}
+        <div class="delete-icon">
+            <i class="fas fa-lock"></i>
+        </div>
+        <div class="delete-title">
+            {% blocktranslate with escaped_object=object %}无法删除 {{ escaped_object }}{% endblocktranslate %}
+        </div>
+        <div class="delete-warning">
+            <div style="margin-bottom: 10px;">{% translate '需要以下权限：' %}</div>
+            <ul>
+                {% for perm in perms_lacking %}
+                    <li>{{ perm }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="button-row">
+            <a href="#" class="btn-cancel" onclick="window.history.back(); return false;">
+                {% translate "返回" %}
+            </a>
+        </div>
+    {% elif protected %}
+        <div class="delete-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="delete-title">
+            {% blocktranslate with escaped_object=object %}无法删除 "{{ escaped_object }}"{% endblocktranslate %}
+        </div>
+        <div class="delete-warning">
+            <div style="margin-bottom: 10px;">{% translate '以下关联对象阻止了删除操作：' %}</div>
+            <ul>
+                {% for obj in protected %}
+                    <li>{{ obj }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="button-row">
+            <a href="#" class="btn-cancel" onclick="window.history.back(); return false;">
+                {% translate "返回" %}
+            </a>
+        </div>
+    {% else %}
+        <div class="delete-icon">
+            <i class="fas fa-trash-alt"></i>
+        </div>
+        <div class="delete-title">
+            {% blocktranslate with escaped_object=object %}确定要删除 "{{ escaped_object }}" 吗？{% endblocktranslate %}
+        </div>
+        {% if model_count %}
+            <div class="related-items">
+                <h3>{% translate '以下关联内容也将被删除：' %}</h3>
+                <ul>
+                    {% for model in model_count %}
+                        <li>{{ model.object }} - {{ model.count }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+        <form method="post">{% csrf_token %}
+            <div class="button-row">
+                <input type="submit" class="btn-delete" value="{% translate '确认删除' %}">
+                <a href="#" class="btn-cancel" onclick="window.history.back(); return false;">
+                    {% translate "取消" %}
+                </a>
+            </div>
+        </form>
+    {% endif %}
+</div>
+{% endblock %} 

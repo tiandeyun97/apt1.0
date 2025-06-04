@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+{% load humanize %}
+{% load static %}
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>日报数据管理</title>
+    <!-- Bootstrap 样式 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google 字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  
+    <link href="{% static 'daily_report_management/css/daily_report.css' %}" rel="stylesheet">
+    <!-- 内联样式修复下拉框箭头重叠问题 -->
+    <style>
+        /* 修复下拉框数字与箭头重叠问题 */
+        #page-size-select {
+            min-width: 70px !important;
+            padding-right: 28px !important;
+            text-align: left !important;
+            /* 完全重置select样式，确保只有一个箭头 */
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            background: #fff url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.5rem center/16px 12px !important;
+        }
+        
+        @media (max-width: 576px) {
+            #page-size-select {
+                min-width: 60px !important;
+            }
+        }
+    </style>
+</head>
+<body class="p-0">
+    <!-- 筛选条件卡片 -->
+    <div class="filter-card">
+        <div class="card-body">
+            <form id="filter-form">
+                <div class="row g-3">
+                    <div class="col-lg-4 col-md-6 col-12">
+                        <label for="date-from" class="form-label">开始日期</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                            <input type="date" class="form-control" id="date-from">
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-12">
+                        <label for="date-to" class="form-label">结束日期</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                            <input type="date" class="form-control" id="date-to">
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-12 col-12">
+                        <label for="channel-name" class="form-label">渠道名称</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" id="channel-name" placeholder="搜索渠道名称...">
+                        </div>
+                    </div>
+                    <div class="col-12 mt-2 text-end">
+                        <button type="button" id="reset-btn" class="btn btn-outline-secondary btn-sm btn-md-normal">
+                            <i class="fas fa-undo me-1"></i>重置
+                        </button>
+                        <button type="button" id="filter-btn" class="btn btn-primary btn-sm btn-md-normal ms-2">
+                            <i class="fas fa-search me-1"></i>查询
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 日报数据表格 -->
+    <div class="report-card">
+        <div class="card-header">
+            <span class="fs-6 fw-medium"><i class="fas fa-table me-2"></i>日报数据列表</span>
+        </div>
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-center" style="min-width: 50px;">#</th>
+                            <th style="min-width: 100px;">日期</th>
+                            <th style="min-width: 180px;">渠道名称</th>
+                            <th style="min-width: 120px;">优化师</th>
+                            <th class="text-end" style="min-width: 90px;">消耗</th>
+                            <th class="text-center" style="min-width: 80px;">注册人数</th>
+                            <th class="text-center" style="min-width: 80px;">首充人数</th>
+                            <th class="text-end" style="min-width: 90px;">注册成本</th>
+                            <th class="text-end" style="min-width: 90px;">首充成本</th>
+                            <th class="text-end" style="min-width: 90px;">预算</th>
+                            <th style="min-width: 80px;">KPI</th>
+                            <th class="text-center" style="min-width: 90px;">日充值率</th>
+                            <th class="text-center" style="min-width: 80px;">2日留存</th>
+                            <th class="text-center" style="min-width: 80px;">3日留存</th>
+                            <th class="text-center" style="min-width: 80px;">4日留存</th>
+                            <th class="text-center" style="min-width: 80px;">5日留存</th>
+                            <th class="text-center" style="min-width: 80px;">7日留存</th>
+                            <th style="min-width: 150px;">预算说明</th>
+                        </tr>
+                    </thead>
+                    <tbody id="report-data">
+                        <tr>
+                            <td colspan="18">
+                                <div class="loading">
+                                    <div class="loading-spinner"></div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="pagination-area">
+            <div class="pagination-container">
+                <div class="pagination">
+                    <div class="d-flex align-items-center justify-content-center flex-wrap w-100">
+                        <span id="page-info" class="mb-2 me-3 text-secondary">第 <strong id="current-page">1</strong> 页，共 <strong id="total-pages">0</strong> 页</span>
+                        <div class="d-flex flex-wrap">
+                            <button id="first-page" class="page-btn me-1 mb-2" title="首页" disabled>
+                                <i class="fas fa-angle-double-left"></i>
+                            </button>
+                            <button id="prev-page" class="page-btn me-1 mb-2" title="上一页" disabled>
+                                <i class="fas fa-angle-left"></i>
+                            </button>
+                            <div id="page-numbers" class="page-numbers me-1 mb-2 d-flex flex-wrap"></div>
+                            <button id="next-page" class="page-btn me-1 mb-2" title="下一页" disabled>
+                                <i class="fas fa-angle-right"></i>
+                            </button>
+                            <button id="last-page" class="page-btn me-3 mb-2" title="末页" disabled>
+                                <i class="fas fa-angle-double-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="page-size d-flex align-items-center justify-content-center w-100 w-md-auto">
+                        <span>每页显示：</span>
+                        <select id="page-size-select" class="custom-select">
+                            <option value="10">10</option>
+                            <option value="20" selected>20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 引用 -->
+    <!-- jQuery库 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap脚本 -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Select2插件 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- 日报数据脚本 -->
+    <script src="{% static 'daily_report_management/js/daily_report_enhanced.js' %}"></script>
+</body>
+</html>

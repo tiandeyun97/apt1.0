@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }}</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css" rel="stylesheet" />
+    <!-- Select2 Bootstrap5 Theme -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+    <!-- 自定义CSS -->
+    <link rel="stylesheet" href="{% static 'task_management/css/task_form.css' %}">
+</head>
+<body>
+    <div class="main-container">
+        <div class="content-wrapper">
+            <div class="page-header">
+                <h2 class="page-title">
+                    <i class="fas fa-{% if task %}edit{% else %}plus-circle{% endif %}"></i>
+                    {{ title }}
+                </h2>
+            </div>
+
+            <form method="post" id="taskForm">
+                {% csrf_token %}
+                
+                <!-- 隐藏字段用于JavaScript识别编辑模式 -->
+                {% if task %}
+                <input type="hidden" id="task-id" value="{{ task.id }}">
+                <input type="hidden" id="media-channel-data" value="{{ task.project.MediaChannelID.MediaChannelName|default:'-'|escapejs }}">
+                <input type="hidden" id="task-type-data" value="{{ task.project.TaskTypeID.TaskTypeName|default:'-'|escapejs }}">
+                <input type="hidden" id="kpi-data" value="{{ task.project.KPI|default:'-'|escapejs }}">
+                <input type="hidden" id="manager-data" value="{{ task.project.ManagerID.username|default:'-'|escapejs }}">
+                <input type="hidden" id="daily-report-data" value="{{ task.project.DailyReportURL|default:'-'|escapejs }}">
+                <input type="hidden" id="status2-data" value="{{ task.project.Status2.TaskStatusName|default:'-'|escapejs }}">
+                <input type="hidden" id="product-backend-data" value="{{ task.project.ProductBackend|default:'-'|escapejs }}">
+                <input type="hidden" id="project-timezone-data" value="{{ task.project.TimeZone|default:'-'|escapejs }}">
+                {% endif %}
+                
+                <!-- 项目信息部分 -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-project-diagram"></i>
+                        所属项目
+                    </h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="project" class="form-label">选择项目</label>
+                            <select class="form-select select2-project" id="project" name="project" required data-placeholder="请输入项目名称搜索...">
+                                <option value="">全部项目</option>
+                                {% for project in projects %}
+                                <option value="{{ project.ProjectID }}" {% if task and task.project.ProjectID == project.ProjectID %}selected{% endif %}>
+                                    {{ project.ProjectName }} 
+                                    {% if project.MediaChannelID %}- [{{ project.MediaChannelID.MediaChannelName }}]{% endif %}
+                                    {% if project.TaskTypeID %}- [{{ project.TaskTypeID.TaskTypeName }}]{% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="projectInfoSection" class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">媒体渠道</label>
+                            <input type="text" class="form-control" id="mediaChannel" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">任务类型</label>
+                            <input type="text" class="form-control" id="taskType" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">KPI</label>
+                            <input type="text" class="form-control" id="kpi" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">运营负责人</label>
+                            <input type="text" class="form-control" id="manager" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">日报链接</label>
+                            <input type="text" class="form-control" id="dailyReport" readonly>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">项目状态</label>
+                            <input type="text" class="form-control" id="status2" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">项目时区</label>
+                            <input type="text" class="form-control" id="projectTimezone" readonly>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="form-label">产品后台</label>
+                            <input type="text" class="form-control" id="productBackend" readonly>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 基本信息部分 -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        基本信息
+                    </h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name" class="form-label">任务名称</label>
+                            <input type="text" class="form-control" id="name" name="name" value="{{ task.name|default:'' }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="advertName" class="form-label">广告命名</label>
+                            <input type="text" class="form-control" id="advertName" name="advert_name" value="{{ task.advert_name|default:'' }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="status" class="form-label">任务状态</label>
+                            <select class="form-select" id="status" name="status" required>
+                                <option value="">请选择状态</option>
+                                {% for status in statuses %}
+                                <option value="{{ status.TaskStatusID }}" {% if task and task.status.TaskStatusID == status.TaskStatusID %}selected{% endif %}>{{ status.TaskStatusName }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="optimizer" class="form-label">优化师</label>
+                            <select class="form-select" id="optimizer" name="optimizer" multiple>
+                                {% for optimizer in optimizers %}
+                                <option value="{{ optimizer.id }}" {% if task and optimizer in task.optimizer.all %}selected{% endif %}>{{ optimizer.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 时间信息部分 -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-clock"></i>
+                        时间信息
+                    </h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="startDate" class="form-label">开始日期</label>
+                            <input type="date" class="form-control" id="startDate" name="start_date" value="{% if task.start_date %}{{ task.start_date|date:'Y-m-d' }}{% endif %}">
+                        </div>
+                        <div class="form-group">
+                            <label for="endDate" class="form-label">结束日期</label>
+                            <input type="date" class="form-control" id="endDate" name="end_date" value="{% if task.end_date %}{{ task.end_date|date:'Y-m-d' }}{% endif %}">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="timezone" class="form-label">时区</label>
+                            <input type="text" class="form-control" id="timezone" name="timezone" value="{{ task.timezone|default:''|escapejs }}" placeholder="请输入时区">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 其他信息部分 -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-cog"></i>
+                        其他信息
+                    </h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="pixel" class="form-label">广告像素</label>
+                            <textarea class="form-control" id="pixel" name="pixel" rows="3">{{ task.pixel|default:'' }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="publishUrl" class="form-label">投放链接</label>
+                            <input type="url" class="form-control" id="publishUrl" name="publish_url" value="{{ task.publish_url|default:'' }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="backend" class="form-label">产品后台</label>
+                            <input type="text" class="form-control" id="backend" name="backend" value="{{ task.backend|default:'' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="product_info" class="form-label">产品信息</label>
+                            <textarea class="form-control" id="product_info" name="product_info" rows="3">{{ task.product_info|default:'' }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="notes" class="form-label">备注</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3">{{ task.notes|default:'' }}</textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <a href="{% url 'task_management:task_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i>
+                        取消
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i>
+                        保存
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <!-- Select2 JS -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
+    
+    <!-- URL变量定义 -->
+    <script>
+        const getProjectInfoUrl = "{% url 'task_management:get_project_info' %}";
+    </script>
+    
+    <!-- 自定义JS -->
+    <script src="{% static 'task_management/js/task_form.js' %}"></script>
+</body>
+</html> 

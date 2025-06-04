@@ -1,0 +1,563 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/forms.css' %}">
+<link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+<style>
+    body {
+        background-color: #f5f7fa;
+    }
+    
+    .form-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        margin-bottom: 24px;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .form-card:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    
+    .form-card .card-header {
+        background: linear-gradient(135deg, #f8f9fb, #f1f4f9);
+        border-bottom: 1px solid #e9ecef;
+        padding: 16px 20px;
+        border-radius: 10px 10px 0 0;
+    }
+    
+    .form-card .card-title {
+        margin: 0;
+        font-size: 18px;
+        color: #3c4858;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-card .card-title i {
+        color: #3498db;
+        margin-right: 10px;
+        font-size: 20px;
+    }
+    
+    .form-card .card-body {
+        padding: 24px;
+        background-color: #fff;
+    }
+    
+    .recent-consumption-list {
+        border-left: 3px solid #3498db;
+        padding-left: 15px;
+        margin-top: 20px;
+    }
+    
+    .recent-consumption-item {
+        margin-bottom: 12px;
+        padding: 12px 16px;
+        background-color: #f8fafd;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        border: 1px solid #edf2f7;
+    }
+    
+    .recent-consumption-item:hover {
+        background-color: #edf7ff;
+        border-color: #d1e6fa;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        border: none;
+        box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
+        font-weight: 500;
+        letter-spacing: 0.3px;
+    }
+    
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #2980b9, #2573a7);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(52, 152, 219, 0.3);
+    }
+    
+    .btn-success {
+        background: linear-gradient(135deg, #2ecc71, #27ae60);
+        border: none;
+        box-shadow: 0 4px 6px rgba(46, 204, 113, 0.2);
+        font-weight: 500;
+        letter-spacing: 0.3px;
+        padding: 10px 24px;
+    }
+    
+    .btn-success:hover {
+        background: linear-gradient(135deg, #27ae60, #219d54);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(46, 204, 113, 0.3);
+    }
+    
+    .btn-outline-secondary {
+        border-color: #cbd5e0;
+        color: #64748b;
+        font-weight: 500;
+    }
+    
+    .btn-outline-secondary:hover {
+        background-color: #f1f5f9;
+        color: #475569;
+        border-color: #a0aec0;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: #4a5568;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        padding: 10px 16px;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        height: auto;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.25);
+    }
+    
+    .input-group-text {
+        background-color: #edf2f7;
+        border: 1px solid #e2e8f0;
+        color: #3c4858;
+        font-weight: 500;
+        border-radius: 8px 0 0 8px;
+        height: 45px;
+    }
+    
+    .alert {
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 20px;
+        border: none;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+    
+    .alert-info {
+        background-color: #e3f2fd;
+        color: #0c5eac;
+        border-left: 4px solid #2196f3;
+    }
+    
+    .alert-success {
+        background-color: #e8f5e9;
+        color: #1b5e20;
+        border-left: 4px solid #4caf50;
+    }
+    
+    .alert-danger {
+        background-color: #fef2f2;
+        color: #b91c1c;
+        border-left: 4px solid #ef4444;
+    }
+    
+    .account-info {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 24px;
+    }
+    
+    .account-info-item {
+        padding: 10px 16px;
+        background-color: #f8fafd;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        border: 1px solid #edf2f7;
+        flex: 1;
+        min-width: 150px;
+        transition: all 0.2s ease;
+    }
+    
+    .account-info-item:hover {
+        background-color: #edf7ff;
+        border-color: #d1e6fa;
+        transform: translateY(-1px);
+    }
+    
+    .account-info-item i {
+        color: #3498db;
+        margin-right: 8px;
+        width: 20px;
+        text-align: center;
+    }
+    
+    .consumption-amount {
+        font-weight: 600;
+        color: #e53e3e;
+        background-color: rgba(229, 62, 62, 0.1);
+        padding: 3px 8px;
+        border-radius: 4px;
+    }
+    
+    /* 通知区域样式 */
+    #notification-area {
+        transition: all 0.3s ease;
+    }
+    
+    #notification-area .alert {
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+    }
+    
+    /* 消息提示 */
+    .messages .alert {
+        animation: slideInDown 0.5s forwards;
+    }
+    
+    @keyframes slideInDown {
+        from {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+    
+    /* 容器样式 */
+    .container {
+        max-width: 1200px;
+        padding: 30px 15px;
+    }
+    
+    /* 页面标题样式 */
+    .page-title {
+        font-size: 24px;
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .page-title i {
+        color: #3498db;
+        margin-right: 10px;
+    }
+    
+    /* 美化返回按钮 */
+    .btn-back {
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+    }
+    
+    .btn-back i {
+        margin-right: 6px;
+    }
+    
+    /* 表格和表单对齐美化 */
+    .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        margin-right: -10px;
+        margin-left: -10px;
+    }
+    
+    .form-group {
+        padding: 0 10px;
+        margin-bottom: 20px;
+    }
+    
+    /* 最近消耗记录卡片美化 */
+    .recent-consumption-card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .recent-consumption-card .card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .recent-consumption-container {
+        flex: 1;
+        overflow-y: auto;
+        max-height: 300px;
+    }
+    
+    /* 表单和控件对齐 */
+    .form-field-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .form-field-label {
+        width: 80px;
+        text-align: right;
+        padding-right: 15px;
+        font-weight: 500;
+    }
+    
+    .form-field-input {
+        flex: 1;
+    }
+    
+    /* 信息突出显示 */
+    .highlight-info {
+        background-color: rgba(52, 152, 219, 0.1);
+        border: 1px solid rgba(52, 152, 219, 0.2);
+        padding: 3px 6px;
+        border-radius: 4px;
+        font-weight: 500;
+        color: #2c3e50;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="page-title">
+                    <i class="fas fa-money-bill-wave"></i> {{ title }}
+                </h1>
+                <a href="{% url 'admin:account_consumption_accountconsumption_changelist' %}" class="btn btn-outline-secondary btn-back">
+                    <i class="fas fa-arrow-left"></i> 返回列表
+                </a>
+            </div>
+            
+            <!-- 账户信息摘要 -->
+            <div class="card form-card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title"><i class="fas fa-credit-card"></i>账户信息</h5>
+                </div>
+                <div class="card-body">
+                    <div class="account-info">
+                        <div class="account-info-item">
+                            <i class="fas fa-id-card"></i> <strong>卡号:</strong> <span class="highlight-info">{{ account.card_number }}</span>
+                        </div>
+                        <div class="account-info-item">
+                            <i class="fas fa-user"></i> <strong>责任人:</strong> <span class="highlight-info">{{ account.responsible_person }}</span>
+                        </div>
+                        <div class="account-info-item">
+                            <i class="fas fa-building"></i> <strong>BM名称:</strong> <span class="highlight-info">{{ account.bm_name }}</span>
+                        </div>
+                        <div class="account-info-item">
+                            <i class="fas fa-tag"></i> <strong>账户ID:</strong> <span class="highlight-info">{{ account.account_id|default:"未设置" }}</span>
+                        </div>
+                        <div class="account-info-item">
+                            <i class="fas fa-check-circle"></i> <strong>状态:</strong> <span class="highlight-info">{{ account.account_status }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 添加消耗表单 -->
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="card form-card">
+                        <div class="card-header">
+                            <h5 class="card-title"><i class="fas fa-money-bill-wave"></i>添加月度消耗</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if existing_record %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-1"></i> 已存在当月({{ existing_record.year }}年{{ existing_record.month }}月)记录，金额为 <span class="consumption-amount">{{ existing_record.amount }}</span> 元。继续填写将会更新该记录。
+                            </div>
+                            {% endif %}
+                            
+                            <!-- 通知区域 -->
+                            <div id="notification-area" class="mb-3"></div>
+                            
+                            <!-- Django消息显示 -->
+                            {% if messages %}
+                            <div class="messages">
+                                {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }}">
+                                    <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% else %}fa-info-circle{% endif %} me-1"></i>
+                                    {{ message }}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            
+                            <form id="monthly-consumption-form" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="account_id" value="{{ account.id }}">
+                                
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="year" class="form-label d-flex align-items-center">
+                                                <i class="far fa-calendar me-2"></i>年份
+                                            </label>
+                                            <input type="number" class="form-control" id="year" name="year" value="{{ default_year }}" required min="2000" max="2100">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label for="month" class="form-label d-flex align-items-center">
+                                                <i class="far fa-calendar-alt me-2"></i>月份
+                                            </label>
+                                            <select class="form-select" id="month" name="month" required>
+                                                {% for i in "123456789101112"|make_list %}
+                                                    <option value="{{ i }}" {% if i|stringformat:"i" == default_month|stringformat:"i" %}selected{% endif %}>{{ i }}月</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="amount" class="form-label d-flex align-items-center">
+                                        <i class="fas fa-dollar-sign me-2"></i>消耗金额 (USD)
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" class="form-control" id="amount" name="amount" step="0.01" min="0" required placeholder="请输入消耗金额">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label for="remark" class="form-label d-flex align-items-center">
+                                        <i class="fas fa-sticky-note me-2"></i>备注
+                                    </label>
+                                    <textarea class="form-control" id="remark" name="remark" rows="3" placeholder="可选：添加消耗相关备注信息"></textarea>
+                                </div>
+                                
+                                <div class="d-flex justify-content-end mt-4">
+                                    <button type="button" class="btn btn-outline-secondary me-3" onclick="window.history.back();">
+                                        <i class="fas fa-times me-1"></i> 取消
+                                    </button>
+                                    
+                                    <!-- 传统表单提交按钮 -->
+                                    <button type="submit" name="submit_form" class="btn btn-success">
+                                        <i class="fas fa-check me-1"></i> 保存并返回
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 最近消耗记录 -->
+                <div class="col-md-5">
+                    <div class="card form-card recent-consumption-card">
+                        <div class="card-header">
+                            <h5 class="card-title"><i class="fas fa-history"></i>最近消耗记录</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="recent-consumption-container" class="recent-consumption-container">
+                                {% if recent_consumptions %}
+                                    <div class="recent-consumption-list">
+                                        {% for consumption in recent_consumptions %}
+                                            <div class="recent-consumption-item">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div><i class="fas fa-calendar-alt me-1"></i> <strong>{{ consumption.month_display }}</strong></div>
+                                                    <div class="consumption-amount">${{ consumption.amount }}</div>
+                                                </div>
+                                                {% if consumption.remark %}
+                                                    <div class="mt-2 small text-muted"><i class="fas fa-sticky-note me-1"></i> {{ consumption.remark }}</div>
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-1"></i> 暂无消耗记录
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+<script>
+$(document).ready(function() {
+    // 添加页面加载动画
+    $('.form-card').each(function(index) {
+        var $this = $(this);
+        setTimeout(function() {
+            $this.addClass('fade-in');
+        }, 100 * index);
+    });
+    
+    // 表单提交
+    $('#monthly-consumption-form').on('submit', function(e) {
+        // 显示加载状态
+        const submitBtn = $(this).find('button[type="submit"]');
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> 保存中...');
+    });
+    
+    // 自动设置为上个月
+    function setDefaultToPreviousMonth() {
+        const today = new Date();
+        let prevMonth = today.getMonth(); // 0-11
+        let prevYear = today.getFullYear();
+        
+        // 如果当前是1月，上个月是去年的12月
+        if (prevMonth === 0) {
+            prevMonth = 12;
+            prevYear--;
+        }
+        
+        // 设置年份和月份
+        $('#year').val(prevYear);
+        $('#month').val(prevMonth);
+    }
+    
+    // 执行自动设置上月
+    setDefaultToPreviousMonth();
+    
+    // 对齐和美化表单元素
+    function enhanceFormControls() {
+        // 统一输入框高度
+        $('.form-control, .form-select').css('height', '45px');
+        
+        // 标签和输入框间距
+        $('.form-label').css('margin-bottom', '10px');
+        
+        // 突出显示当前选择的月份
+        $('#month').on('change', function() {
+            $(this).addClass('border-primary');
+        });
+        
+        // 增加输入框聚焦效果
+        $('.form-control, .form-select').on('focus', function() {
+            $(this).parent().addClass('focused');
+        }).on('blur', function() {
+            $(this).parent().removeClass('focused');
+        });
+    }
+    
+    // 执行表单美化
+    enhanceFormControls();
+});
+</script>
+{% endblock %}
