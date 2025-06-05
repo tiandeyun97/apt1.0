@@ -157,7 +157,15 @@ function fetchProjectInfo(projectId) {
                 }
                 
                 // 显示项目信息区域
-                document.getElementById('projectInfoSection').style.display = 'block';
+                const projectInfoSection = document.getElementById('projectInfoSection');
+                projectInfoSection.style.display = 'block';
+                
+                // 同时更新折叠图标
+                const toggleIcon = document.querySelector('#projectInfoToggle .toggle-icon');
+                if (toggleIcon) {
+                    toggleIcon.classList.remove('fa-chevron-down');
+                    toggleIcon.classList.add('fa-chevron-up');
+                }
             } else {
                 console.error('获取项目信息失败:', data.message);
             }

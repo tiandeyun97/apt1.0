@@ -2,6 +2,7 @@ from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from .models import Project
 from task_management.models import Task
+from task_management.views import decode_unicode_escapes
 
 @receiver(pre_save, sender=Project)
 def store_original_status2(sender, instance, **kwargs):
@@ -53,17 +54,21 @@ def update_tasks_timezone(sender, instance, created, **kwargs):
     
     # 检查时区是否发生变化
     if hasattr(instance, '_original_timezone') and instance._original_timezone != instance.TimeZone:
+        # 解码项目时区值
+        timezone = decode_unicode_escapes(instance.TimeZone) if instance.TimeZone else None
+        original_timezone = decode_unicode_escapes(instance._original_timezone) if instance._original_timezone else None
+        
         # 更新所有关联任务的时区（仅更新时区为空或与原始项目时区相同的任务）
         Task.objects.filter(project=instance).filter(
             timezone__isnull=True
-        ).update(timezone=instance.TimeZone)
+        ).update(timezone=timezone)
         
         # 更新那些时区与项目原时区相同的任务，这意味着它们可能是跟随项目时区的
-        if instance._original_timezone:  # 确保原时区不是None
+        if original_timezone:  # 确保原时区不是None
             Task.objects.filter(
                 project=instance, 
-                timezone=instance._original_timezone
-            ).update(timezone=instance.TimeZone)
+                timezone=original_timezone
+            ).update(timezone=timezone)
 
 @receiver(pre_save, sender=Task)
 def set_task_timezone_from_project(sender, instance, **kwargs):
@@ -74,6 +79,7 @@ def set_task_timezone_from_project(sender, instance, **kwargs):
     if not instance.timezone and instance.project_id:
         try:
             project = Project.objects.get(pk=instance.project_id)
-            instance.timezone = project.TimeZone
+            # 解码项目时区值
+            instance.timezone = decode_unicode_escapes(project.TimeZone) if project.TimeZone else None
         except Project.DoesNotExist:
-            pass 
+            pass

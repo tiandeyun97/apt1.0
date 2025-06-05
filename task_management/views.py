@@ -20,6 +20,17 @@ import logging
 # 获取logger
 logger = logging.getLogger('task_management')
 
+def decode_unicode_escapes(text):
+    """解码字符串中的Unicode转义序列"""
+    if not text:
+        return text
+        
+    try:
+        # 将Unicode转义序列解码为实际字符
+        return bytes(str(text), 'utf-8').decode('unicode_escape')
+    except Exception:
+        return text
+
 class TaskListView(LoginRequiredMixin, ListView):
     model = Task
     template_name = 'admin/task_management/task/task_list.html'
@@ -159,6 +170,10 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
             # 设置公司
             form.instance.company = self.request.user.company
             
+            # 处理时区字段中的Unicode转义序列
+            if 'timezone' in form.cleaned_data and form.cleaned_data['timezone']:
+                form.instance.timezone = decode_unicode_escapes(form.cleaned_data['timezone'])
+            
             # 检查是否是编辑模式
             task_id = self.request.GET.get('id')
             if task_id:
@@ -176,7 +191,11 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
                     # 更新实例的每个字段
                     for field in form.cleaned_data:
                         if field != 'optimizer':  # 多对多字段需要特殊处理
-                            setattr(self.object, field, form.cleaned_data[field])
+                            if field == 'timezone' and form.cleaned_data[field]:
+                                # 处理时区字段
+                                setattr(self.object, field, decode_unicode_escapes(form.cleaned_data[field]))
+                            else:
+                                setattr(self.object, field, form.cleaned_data[field])
                     
                     # 保存更新后的实例
                     self.object.save()
@@ -271,6 +290,9 @@ def get_project_info(request):
             product_backend = project.ProductBackend or '-'
             timezone = project.TimeZone or '-'
             
+            # 对时区值进行解码处理
+            timezone = decode_unicode_escapes(timezone)
+            
             data = {
                 'success': True,
                 'media_channel': project.MediaChannelID.MediaChannelName if project.MediaChannelID else '-',
@@ -331,11 +353,17 @@ def get_task_detail(request):
             pixel = task.pixel or ''
             publish_url = task.publish_url or ''
             
+            # 对时区值进行解码处理
+            timezone = decode_unicode_escapes(timezone)
+            
             # 项目相关字段
             daily_report_url = task.project.DailyReportURL or '-' if task.project else '-'
             kpi = task.project.KPI or '-' if task.project else '-'
             product_backend = task.project.ProductBackend or '-' if task.project else '-'
             project_timezone = task.project.TimeZone or '-' if task.project else '-'
+            
+            # 对项目时区值进行解码处理
+            project_timezone = decode_unicode_escapes(project_timezone)
             
             data = {
                 'success': True,
@@ -725,7 +753,10 @@ def import_tasks(request):
                         if '投放链接' in row and not pd.isna(row['投放链接']):
                             task.publish_url = str(row['投放链接'])
                         if '时区' in row and not pd.isna(row['时区']):
-                            task.timezone = str(row['时区'])
+                            # 解码时区值中可能的Unicode转义序列
+                            timezone_value = str(row['时区'])
+                            # 将Unicode转义序列解码为实际字符
+                            task.timezone = decode_unicode_escapes(timezone_value)
                             
                         task.save()
                         update_count += 1
@@ -745,7 +776,7 @@ def import_tasks(request):
                             notes=str(row['备注']) if '备注' in row and not pd.isna(row['备注']) else '',
                             pixel=str(row['广告像素']) if '广告像素' in row and not pd.isna(row['广告像素']) else '',
                             publish_url=str(row['投放链接']) if '投放链接' in row and not pd.isna(row['投放链接']) else '',
-                            timezone=str(row['时区']) if '时区' in row and not pd.isna(row['时区']) else '',
+                            timezone=decode_unicode_escapes(str(row['时区'])) if '时区' in row and not pd.isna(row['时区']) else '',
                         )
                         task.save()
                         

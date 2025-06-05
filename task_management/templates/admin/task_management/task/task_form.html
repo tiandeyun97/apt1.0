@@ -17,6 +17,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
     <!-- 自定义CSS -->
     <link rel="stylesheet" href="{% static 'task_management/css/task_form.css' %}">
+    <style>
+        .project-info-details {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <div class="main-container">
@@ -28,7 +33,7 @@
                 </h2>
             </div>
 
-            <form method="post" id="taskForm">
+            <form method="post" id="taskForm" {% if task %}data-has-task="true"{% else %}data-has-task="false"{% endif %}>
                 {% csrf_token %}
                 
                 <!-- 隐藏字段用于JavaScript识别编辑模式 -->
@@ -46,12 +51,13 @@
                 
                 <!-- 项目信息部分 -->
                 <div class="form-section">
-                    <h3 class="section-title">
+                    <h3 class="section-title" id="projectInfoToggle" style="cursor: pointer;">
                         <i class="fas fa-project-diagram"></i>
                         所属项目
+                        <i class="fas fa-chevron-down toggle-icon ml-auto"></i>
                     </h3>
                     <div class="form-row">
-                        <div class="form-group">
+                        <div class="form-group" style="width: 100%;">
                             <label for="project" class="form-label">选择项目</label>
                             <select class="form-select select2-project" id="project" name="project" required data-placeholder="请输入项目名称搜索...">
                                 <option value="">全部项目</option>
@@ -66,47 +72,46 @@
                         </div>
                     </div>
                     
-                    <div id="projectInfoSection" class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">媒体渠道</label>
-                            <input type="text" class="form-control" id="mediaChannel" readonly>
+                    <div id="projectInfoSection" class="project-info-details">
+                        <div class="form-row compact-row">
+                            <div class="form-group compact-field">
+                                <label class="form-label small-label">媒体渠道</label>
+                                <input type="text" class="form-control small-input" id="mediaChannel" readonly>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">任务类型</label>
-                            <input type="text" class="form-control" id="taskType" readonly>
+                            <div class="form-group compact-field">
+                                <label class="form-label small-label">任务类型</label>
+                                <input type="text" class="form-control small-input" id="taskType" readonly>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">KPI</label>
-                            <input type="text" class="form-control" id="kpi" readonly>
+                            <div class="form-group compact-field">
+                                <label class="form-label small-label">项目状态</label>
+                                <input type="text" class="form-control small-input" id="status2" readonly>
                         </div>
+                            <div class="form-group compact-field">
+                                <label class="form-label small-label">项目时区</label>
+                                <input type="text" class="form-control small-input" id="projectTimezone" readonly>
                     </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">运营负责人</label>
-                            <input type="text" class="form-control" id="manager" readonly>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">日报链接</label>
-                            <input type="text" class="form-control" id="dailyReport" readonly>
+                        
+                        <div class="form-row compact-row">
+                            <div class="form-group compact-field">
+                                <label class="form-label small-label">KPI</label>
+                                <input type="text" class="form-control small-input" id="kpi" readonly>
                         </div>
+                            <div class="form-group compact-field">
+                                <label class="form-label small-label">运营负责人</label>
+                                <input type="text" class="form-control small-input" id="manager" readonly>
                     </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">项目状态</label>
-                            <input type="text" class="form-control" id="status2" readonly>
+                            <div class="form-group" style="flex: 2;">
+                                <label class="form-label small-label">日报链接</label>
+                                <input type="text" class="form-control small-input" id="dailyReport" readonly>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">项目时区</label>
-                            <input type="text" class="form-control" id="projectTimezone" readonly>
                         </div>
+                        
+                        <div class="form-row compact-row">
+                            <div class="form-group" style="width: 100%;">
+                                <label class="form-label small-label">产品后台</label>
+                                <input type="text" class="form-control small-input" id="productBackend" readonly>
                     </div>
-
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label class="form-label">产品后台</label>
-                            <input type="text" class="form-control" id="productBackend" readonly>
                         </div>
                     </div>
                 </div>
@@ -234,5 +239,40 @@
     
     <!-- 自定义JS -->
     <script src="{% static 'task_management/js/task_form.js' %}"></script>
+    
+    <script>
+        // 在页面加载完成后，解码时区字段中的Unicode转义序列
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取时区输入框
+            const timezoneInput = document.getElementById('timezone');
+            if (timezoneInput && timezoneInput.value) {
+                // 使用decodeHtmlEntities函数解码时区值
+                timezoneInput.value = decodeHtmlEntities(timezoneInput.value);
+            }
+            
+            // 项目信息折叠/展开功能
+            const projectInfoToggle = document.getElementById('projectInfoToggle');
+            const projectInfoSection = document.getElementById('projectInfoSection');
+            
+            // 设置初始显示状态
+            const hasTask = document.getElementById('taskForm').getAttribute('data-has-task') === 'true';
+            if (hasTask) {
+                projectInfoSection.style.display = 'block';
+            }
+            
+            projectInfoToggle.addEventListener('click', function() {
+                const toggleIcon = this.querySelector('.toggle-icon');
+                if (projectInfoSection.style.display === 'none') {
+                    projectInfoSection.style.display = 'block';
+                    toggleIcon.classList.remove('fa-chevron-down');
+                    toggleIcon.classList.add('fa-chevron-up');
+                } else {
+                    projectInfoSection.style.display = 'none';
+                    toggleIcon.classList.remove('fa-chevron-up');
+                    toggleIcon.classList.add('fa-chevron-down');
+                }
+            });
+        });
+    </script>
 </body>
 </html> 

@@ -23,28 +23,6 @@
             padding-top: 4px;
         }
         
-        /* 可编辑字段样式 */
-        .editable-field {
-            position: relative;
-        }
-        
-        .editable-field .edit-return-flow-btn {
-            opacity: 0.2;
-            transition: opacity 0.2s;
-        }
-        
-        .editable-field:hover .edit-return-flow-btn {
-            opacity: 1;
-        }
-        
-        .editable-field .input-group-sm {
-            width: 150px;
-        }
-        
-        .editable-field .return-flow-input {
-            min-width: 80px;
-        }
-        
         /* Toast容器样式 */
         #toast-container {
             z-index: 1050;
@@ -284,25 +262,7 @@
                                     </td>
                                     <td><span class="ellipsis" title="{{ consumption.task.project.ProjectName }}">{{ consumption.task.project.ProjectName }}</span></td>
                                     <td><span class="badge bg-light text-dark">{{ consumption.daily_consumption }}</span></td>
-                                    <td>
-                                        <div class="editable-field" data-consumption-id="{{ consumption.id }}">
-                                            <span class="editable-text">{{ consumption.return_flow }}</span>
-                                            <a href="#" class="edit-return-flow-btn ms-1" title="编辑回流">
-                                                <i class="fas fa-edit text-primary"></i>
-                                            </a>
-                                            <div class="edit-form d-none">
-                                                <div class="input-group input-group-sm">
-                                                    <input type="number" class="form-control form-control-sm return-flow-input" value="{{ consumption.return_flow }}" step="0.01">
-                                                    <button class="btn btn-sm btn-primary save-return-flow-btn" type="button">
-                                                        <i class="fas fa-save"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-secondary cancel-edit-btn" type="button">
-                                                        <i class="fas fa-times"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
+                                    <td>{{ consumption.return_flow }}</td>
                                     <td><span class="fw-bold text-primary actual-consumption-value">{{ consumption.actual_consumption }}</span></td>
                                     <td class="mobile-hide"><span class="return-flow-ratio-value">{{ consumption.return_flow_ratio }}</span>%</td>
                                     <td class="mobile-hide">{{ consumption.impressions }}</td>
@@ -518,93 +478,6 @@
             // 项目变化时清空任务选择
             $('#project').on('change', function() {
                 $('#task').val(null).trigger('change');
-            });
-            
-            // 处理回流字段的内联编辑
-            $(document).on('click', '.edit-return-flow-btn', function(e) {
-                e.preventDefault();
-                const container = $(this).closest('.editable-field');
-                container.find('.editable-text, .edit-return-flow-btn').addClass('d-none');
-                container.find('.edit-form').removeClass('d-none');
-                container.find('.return-flow-input').focus();
-            });
-            
-            // 取消编辑按钮
-            $(document).on('click', '.cancel-edit-btn', function() {
-                const container = $(this).closest('.editable-field');
-                container.find('.edit-form').addClass('d-none');
-                container.find('.editable-text, .edit-return-flow-btn').removeClass('d-none');
-                
-                // 恢复原始值
-                const originalValue = container.find('.editable-text').text().trim();
-                container.find('.return-flow-input').val(originalValue);
-            });
-            
-            // 保存回流编辑
-            $(document).on('click', '.save-return-flow-btn', function() {
-                const container = $(this).closest('.editable-field');
-                const consumptionId = container.data('consumption-id');
-                const newReturnFlow = container.find('.return-flow-input').val();
-                const row = container.closest('tr');
-                
-                // 显示加载指示器
-                $(this).html('<i class="fas fa-spinner fa-spin"></i>');
-                $(this).prop('disabled', true);
-                
-                // 发送AJAX请求更新回流值
-                $.ajax({
-                    url: '/consumption/consumption/' + consumptionId + '/update-return-flow/',
-                    method: 'POST',
-                    contentType: 'application/json',
-                    data: JSON.stringify({ return_flow: newReturnFlow }),
-                    headers: {
-                        'X-CSRFToken': getCsrfToken()
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            // 更新显示的值
-                            container.find('.editable-text').text(response.consumption.return_flow);
-                            container.find('.edit-form').addClass('d-none');
-                            container.find('.editable-text, .edit-return-flow-btn').removeClass('d-none');
-                            
-                            // 更新相关字段
-                            row.find('.actual-consumption-value').text(response.consumption.actual_consumption);
-                            row.find('.return-flow-ratio-value').text(response.consumption.return_flow_ratio);
-                            
-                            // 显示成功提示
-                            showToast('回流更新成功', 'success');
-                        } else {
-                            showToast('更新失败: ' + response.error, 'error');
-                        }
-                    },
-                    error: function(xhr) {
-                        let errorMessage = '更新失败';
-                        try {
-                            const response = JSON.parse(xhr.responseText);
-                            if (response.error) {
-                                errorMessage = response.error;
-                            }
-                        } catch(e) {}
-                        showToast(errorMessage, 'error');
-                    },
-                    complete: function() {
-                        // 恢复按钮状态
-                        container.find('.save-return-flow-btn').html('<i class="fas fa-save"></i>');
-                        container.find('.save-return-flow-btn').prop('disabled', false);
-                    }
-                });
-            });
-            
-            // 回车键保存
-            $(document).on('keydown', '.return-flow-input', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    $(this).closest('.editable-field').find('.save-return-flow-btn').click();
-                }
-                else if (e.key === 'Escape') {
-                    e.preventDefault();
-                    $(this).closest('.editable-field').find('.cancel-edit-btn').click();
-                }
             });
             
             // 获取CSRF Token的辅助函数
