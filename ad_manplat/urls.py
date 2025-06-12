@@ -19,6 +19,11 @@ from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from django.views.generic import RedirectView
 from django.conf import settings
+from django.conf.urls.static import static
+from django.shortcuts import redirect
+from reconciliation_management.admin import ReconciliationRecordAdmin
+from reconciliation_management.models import ReconciliationRecord
+from reconciliation_management import views as reconciliation_views
 
 # 自定义admin站点设置
 admin.site.site_header = '广告投放管理平台'
@@ -46,10 +51,22 @@ class AdminLogoutView(auth_views.LogoutView):
     next_page = '/admin/login/'
     http_method_names = ['post']  # 只允许POST请求
 
+# 手动注册对账管理的自定义视图
+record_admin = ReconciliationRecordAdmin(ReconciliationRecord, admin.site)
+
 urlpatterns = [
     # Admin后台路由 - 自定义登录/退出路由要在admin.site.urls之前
     path('admin/login/', AdminLoginView.as_view()),
     path('admin/logout/', AdminLogoutView.as_view()),
+    
+    # 对账管理自定义视图
+    path('admin/reconciliation_management/reconciliationrecord/waiting/', reconciliation_views.waiting_list, name='admin_waiting_list'),
+    path('admin/reconciliation_management/reconciliationrecord/exception/', reconciliation_views.exception_list, name='admin_exception_list'),
+    path('admin/reconciliation_management/reconciliationrecord/completed/', reconciliation_views.completed_list, name='admin_completed_list'),
+    
+    # 对账管理默认列表视图的重定向
+    path('admin/reconciliation_management/reconciliationrecord/', lambda request: redirect('/admin/reconciliation_management/reconciliationrecord/waiting/'), name='admin_reconciliation_redirect'),
+    
     path('admin/', admin.site.urls),
     
     # 组织架构模块
@@ -73,7 +90,14 @@ urlpatterns = [
     # 数据分析模块
     path('data_analysis/', include('data_analysis.urls', namespace='data_analysis')),
     
+    # 对账管理模块
+    path('reconciliation/', include('reconciliation_management.urls', namespace='reconciliation')),
+    
     # 首页
     path('', RedirectView.as_view(url='/admin/', permanent=False)),
     path('accounts/', include('django.contrib.auth.urls')),
 ]
+
+# 开发环境中提供媒体文件服务
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

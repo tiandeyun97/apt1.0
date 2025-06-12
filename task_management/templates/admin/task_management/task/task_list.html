@@ -234,9 +234,7 @@
                             <th class="sortable" data-sort="kpi">KPI</th>
                             <th class="sortable" data-sort="timezone">时区</th>
                             <th>日报链接</th>
-                            <th>像素或者MCC</th>
                             <th class="sortable" data-sort="optimizer">优化师</th>
-                            <th class="sortable" data-sort="manager">运营负责人</th>
                             <th class="sortable" data-sort="start_date">开始日期</th>
                             <th class="sortable" data-sort="end_date">结束日期</th>
                             <th>备注</th>
@@ -324,15 +322,6 @@
                                 -
                                 {% endif %}
                             </td>
-                            <td data-label="广告像素">
-                                {% if task.pixel %}
-                                <span class="truncate" data-bs-toggle="tooltip" title="{{ task.pixel }}">
-                                    {{ task.pixel }}
-                                </span>
-                                {% else %}
-                                -
-                                {% endif %}
-                            </td>
                             <td data-label="优化师">
                                 {% for optimizer in task.optimizer.all %}
                                 <span class="badge bg-info">{{ optimizer.username }}</span>
@@ -340,7 +329,6 @@
                                 -
                                 {% endfor %}
                             </td>
-                            <td data-label="运营负责人">{{ task.project.ManagerID.username|default:'-' }}</td>
                             <td data-label="开始日期">{{ task.start_date|date:"Y-m-d" }}</td>
                             <td data-label="结束日期">
                                 {% if perms.task_management.change_task %}
@@ -460,40 +448,40 @@
                 </div>
             </div>
             
-            <nav aria-label="任务列表分页">
-                <ul class="pagination pagination-sm mb-0">
+            <nav aria-label="分页导航" class="pagination-nav mt-4">
+                <ul class="pagination justify-content-center">
                     {% if page_obj.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="首页">
-                            <i class="fas fa-angle-double-left"></i>
+                        <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="第一页">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
                         </a>
                     </li>
                     <li class="page-item">
                         <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="上一页">
-                            <i class="fas fa-angle-left"></i>
+                            <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
                     {% else %}
                     <li class="page-item disabled">
-                        <a class="page-link" href="#" aria-label="首页">
-                            <i class="fas fa-angle-double-left"></i>
+                        <a class="page-link" href="#" aria-label="第一页">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
                         </a>
                     </li>
                     <li class="page-item disabled">
                         <a class="page-link" href="#" aria-label="上一页">
-                            <i class="fas fa-angle-left"></i>
+                            <span aria-hidden="true">&laquo;</span>
                         </a>
                     </li>
                     {% endif %}
                     
-                    {% for i in paginator.page_range %}
-                        {% if page_obj.number == i %}
-                        <li class="page-item active" aria-current="page">
-                            <span class="page-link">{{ i }}</span>
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                        <li class="page-item active">
+                            <a class="page-link" href="#">{{ num }}</a>
                         </li>
-                        {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                         <li class="page-item">
-                            <a class="page-link" href="?page={{ i }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ i }}</a>
+                            <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
                         </li>
                         {% endif %}
                     {% endfor %}
@@ -501,23 +489,23 @@
                     {% if page_obj.has_next %}
                     <li class="page-item">
                         <a class="page-link" href="?page={{ page_obj.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="下一页">
-                            <i class="fas fa-angle-right"></i>
+                            <span aria-hidden="true">&raquo;</span>
                         </a>
                     </li>
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="末页">
-                            <i class="fas fa-angle-double-right"></i>
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}" aria-label="最后一页">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
                         </a>
                     </li>
                     {% else %}
                     <li class="page-item disabled">
                         <a class="page-link" href="#" aria-label="下一页">
-                            <i class="fas fa-angle-right"></i>
+                            <span aria-hidden="true">&raquo;</span>
                         </a>
                     </li>
                     <li class="page-item disabled">
-                        <a class="page-link" href="#" aria-label="末页">
-                            <i class="fas fa-angle-double-right"></i>
+                        <a class="page-link" href="#" aria-label="最后一页">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
                         </a>
                     </li>
                     {% endif %}

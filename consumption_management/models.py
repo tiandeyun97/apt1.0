@@ -13,6 +13,7 @@ class TaskConsumption(models.Model):
     return_flow = models.DecimalField('回流', max_digits=10, decimal_places=2, default=0, blank=True)
     actual_consumption = models.DecimalField('实际消耗', max_digits=10, decimal_places=2, editable=False)
     registrations = models.IntegerField('注册人数', default=0, blank=True)
+    installations = models.IntegerField('安装量', default=0, blank=True)
     first_deposits = models.IntegerField('首充人数', default=0, blank=True)
     impressions = models.IntegerField('展示量', default=0, blank=True)
     clicks = models.IntegerField('点击量', default=0, blank=True)
@@ -87,3 +88,15 @@ class TaskConsumption(models.Model):
 
     def __str__(self):
         return f"{self.task.name} - {self.date}"
+
+class TaskConsumptionMonitor(TaskConsumption):
+    """任务消耗监控模型 - 此模型仅用于在Admin左侧导航中显示菜单项"""
+    
+    class Meta:
+        verbose_name = '消耗监控'
+        verbose_name_plural = '消耗监控'
+        proxy = True
+        # 确保在Admin中正确显示
+        app_label = 'consumption_management'
+        # 自定义管理器名称，区分于TaskConsumption
+        default_manager_name = 'objects'

@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'daily_report_management.apps.DailyReportManagementConfig',
     'data_analysis.apps.DataAnalysisConfig',
     'account_consumption.apps.AccountConsumptionConfig',
+    'reconciliation_management.apps.ReconciliationManagementConfig',
 ]
 
 MIDDLEWARE = [
@@ -73,6 +74,7 @@ TEMPLATES = [
             BASE_DIR / 'consumption_management' / 'templates',
             BASE_DIR / 'data_analysis' / 'templates',
             BASE_DIR / 'account_consumption' / 'templates',
+            BASE_DIR / 'reconciliation_management' / 'templates',
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -156,9 +158,14 @@ STATICFILES_DIRS = [
     BASE_DIR / 'task_management' / 'static',
     BASE_DIR / 'data_analysis' / 'static',
     BASE_DIR / 'account_consumption' / 'static',
+    BASE_DIR / 'reconciliation_management' / 'static',
 ]
 
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# 媒体文件设置
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -204,7 +211,11 @@ SIMPLEUI_ICON = {
     '账户管理': 'fas fa-user-circle',
     '日报管理': 'fas fa-calendar-day',
     '数据分析': 'fas fa-chart-line',
-    '账户消耗管理': 'fas fa-credit-card'
+    '账户消耗管理': 'fas fa-credit-card',
+    '对账管理': 'fas fa-balance-scale',
+    '消耗管理': 'fas fa-chart-bar',
+    '消耗明细': 'fas fa-list-alt',
+    '消耗监控': 'fas fa-tachometer-alt'
 }
 
 # Admin设置

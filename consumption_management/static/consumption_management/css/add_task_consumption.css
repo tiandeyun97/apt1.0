@@ -486,4 +486,128 @@ body {
   position: sticky;
   top: 0;
   z-index: 10;
+}
+
+/* 可编辑字段样式 */
+.editable-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.editable-field .edit-actual-consumption-btn {
+    opacity: 0;
+    transition: opacity 0.2s, visibility 0.2s;
+    margin-left: 5px;
+    visibility: hidden; /* 默认隐藏 */
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 3px;
+}
+
+.editable-field .edit-actual-consumption-btn:hover {
+    background-color: rgba(44, 123, 229, 0.1);
+}
+
+.editable-field:hover .edit-actual-consumption-btn {
+    opacity: 1;
+    visibility: visible; /* 悬停时显示 */
+}
+
+/* 当行被悬停时也显示编辑按钮 */
+tr:hover .editable-field .edit-actual-consumption-btn {
+    opacity: 0.7;
+    visibility: visible;
+}
+
+/* 当直接悬停在编辑字段上时，按钮完全不透明 */
+.editable-field:hover .edit-actual-consumption-btn {
+    opacity: 1;
+}
+
+/* 确保只有悬停时才显示按钮，覆盖其他可能的样式 */
+.hover-only {
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+tr:hover .hover-only,
+.editable-field:hover .hover-only {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* 触摸设备支持 */
+@media (hover: none) {
+    .editable-field .edit-actual-consumption-btn {
+        opacity: 0;
+        visibility: hidden;
+    }
+    
+    /* 即使在触摸设备上也要确保显示按钮需要点击一次 */
+    .editable-field:active .edit-actual-consumption-btn.hover-only {
+        opacity: 1;
+        visibility: visible;
+        padding: 8px; /* 触摸设备上提供更大的点击区域 */
+    }
+}
+
+.editable-field .input-group-sm {
+    width: 150px;
+}
+
+.editable-field .actual-consumption-input {
+    min-width: 80px;
+}
+
+/* Toast容器样式 */
+#toast-container {
+    z-index: 1050;
+}
+
+/* 增强自适应布局 - 平板 */
+@media (max-width: 992px) {
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .info-card .row > div {
+        margin-bottom: 10px;
+    }
+    
+    .editable-field .input-group-sm {
+        width: 120px;
+    }
+    
+    .btn-action {
+        padding: 0.25rem 0.5rem;
+    }
+}
+
+/* 增强自适应布局 - 手机 */
+@media (max-width: 576px) {
+    .btn-action {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .mobile-hide {
+        display: none;
+    }
+    
+    .editable-field .input-group-sm {
+        width: 100px;
+    }
+    
+    .page-container {
+        padding: 10px;
+    }
+    
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    .info-card {
+        padding: 15px 10px;
+    }
 } 

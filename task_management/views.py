@@ -44,7 +44,7 @@ class TaskListView(LoginRequiredMixin, ListView):
         logger.info(f"[TaskListView] 查询参数: {dict(self.request.GET.items())}")
         
         # 获取基础查询集
-        queryset = super().get_queryset()
+        queryset = Task.objects.all().order_by('-sort_number', '-created_at')
         
         # 应用任务权限过滤
         filtered_queryset = TaskPermission.filter_tasks_by_role(queryset, self.request.user)
@@ -85,8 +85,8 @@ class TaskListView(LoginRequiredMixin, ListView):
             logger.warning("[TaskListView] 过滤后没有结果")
             messages.warning(self.request, '没有找到符合条件的任务，请尝试调整筛选条件')
         
-        # 应用排序并返回
-        return filtered_queryset.distinct().order_by('-created_at')
+        # 返回过滤后的结果，保持排序一致
+        return filtered_queryset.distinct().order_by('-sort_number', '-created_at')
     
     def get_context_data(self, **kwargs):
         """添加额外上下文数据"""
@@ -112,7 +112,7 @@ class TaskCreateView(LoginRequiredMixin, CreateView):
     model = Task
     template_name = 'admin/task_management/task/task_form.html'
     fields = ['name', 'advert_name', 'project', 'product_info', 'status', 'backend', 
-             'start_date', 'end_date', 'notes', 'pixel', 'publish_url', 'timezone', 'optimizer']
+             'start_date', 'end_date', 'notes', 'pixel', 'publish_url', 'timezone', 'optimizer', 'sort_number']
     success_url = reverse_lazy('task_management:task_list')
 
     def get_context_data(self, **kwargs):
@@ -1057,3 +1057,30 @@ def update_task_end_date(request):
     except Exception as e:
         logger.error(f"更新任务结束日期时出错: {str(e)}")
         return JsonResponse({'success': False, 'error': f'更新失败: {str(e)}'}, status=500)
+
+class TaskUpdateView(LoginRequiredMixin, UpdateView):
+    model = Task
+    template_name = 'admin/task_management/task/task_form.html'
+    fields = ['name', 'advert_name', 'project', 'product_info', 'status', 'backend', 
+             'start_date', 'end_date', 'notes', 'pixel', 'publish_url', 'timezone', 'optimizer', 'sort_number']
+    success_url = reverse_lazy('task_management:task_list')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = '编辑任务'
+        
+        # 添加项目列表到上下文 - 只显示用户所在公司的项目
+        context['projects'] = Project.objects.filter(CompanyID=self.request.user.company).order_by('ProjectName')
+        
+        # 添加任务状态列表到上下文
+        context['statuses'] = TaskStatus.objects.filter(CompanyID=self.request.user.company)
+        
+        # 添加优化师列表到上下文
+        context['optimizers'] = User.objects.filter(
+            Q(groups__name='部门主管') |
+            Q(groups__name='小组长') |
+            Q(groups__name='优化师'),
+            company=self.request.user.company
+        ).distinct()
+        
+        return context

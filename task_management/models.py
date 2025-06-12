@@ -3,6 +3,7 @@ from django.utils import timezone
 import uuid
 from tasks.models import Project, TaskStatus
 from organize.models import Company, User
+import re
 
 class Task(models.Model):
     """任务模型"""
@@ -27,11 +28,12 @@ class Task(models.Model):
         related_name='optimized_tasks',
         blank=True
     )
+    sort_number = models.IntegerField('排序数字', default=0, help_text='从任务名称中提取的数字，用于排序')
     
     class Meta:
         verbose_name = '任务'
         verbose_name_plural = '任务列表'
-        ordering = ['-created_at']
+        ordering = ['-sort_number', '-created_at']
     
     def __str__(self):
         return self.name
@@ -45,3 +47,18 @@ class Task(models.Model):
             raise ValidationError({
                 'end_date': _('结束日期必须晚于开始日期。')
             })
+    
+    def save(self, *args, **kwargs):
+        # 从任务名称中提取排序数字
+        if self.name:
+            # 使用正则表达式从名称中提取最后一个连字符后的数字
+            match = re.search(r'-(\d+)$', self.name)
+            if match:
+                self.sort_number = int(match.group(1))
+            else:
+                # 如果没有匹配到特定模式，尝试提取任何数字作为备选
+                numbers = re.findall(r'\d+', self.name)
+                if numbers:
+                    self.sort_number = int(numbers[-1])
+        
+        super().save(*args, **kwargs)

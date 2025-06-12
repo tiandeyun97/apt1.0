@@ -449,8 +449,8 @@ $(document).ready(function() {
                     <tr>
                         <th style="width: 120px;">日期</th>
                         <th class="text-end">当日消耗</th>
-                        <th class="text-end">回流</th>
                         <th class="text-end">实际消耗</th>
+                        <th class="text-end">回流</th>
                         <th class="text-end">点击量</th>
                         <th class="text-end">注册人数</th>
                         <th class="text-end">首充人数</th>
@@ -474,8 +474,8 @@ $(document).ready(function() {
                 const recordRow = $('<tr>').html(`
                     <td>${record.date}</td>
                     <td class="text-end"><span class="badge bg-light text-dark">${record.daily_consumption}</span></td>
-                    <td class="text-end">${record.return_flow}</td>
                     <td class="text-end"><span class="fw-bold text-primary">${record.actual_consumption}</span></td>
+                    <td class="text-end">${record.return_flow}</td>
                     <td class="text-end">${record.clicks}</td>
                     <td class="text-end"><span class="badge bg-success text-white">${record.registrations}</span></td>
                     <td class="text-end"><span class="badge bg-warning text-dark">${record.first_deposits}</span></td>

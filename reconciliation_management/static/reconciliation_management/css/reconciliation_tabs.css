@@ -1,0 +1,493 @@
+/* 对账管理系统标签页样式 */
+
+:root {
+    --primary-color: #4361ee;
+    --secondary-color: #3f37c9;
+    --success-color: #4cc9f0;
+    --warning-color: #f72585;
+    --info-color: #4895ef;
+    --danger-color: #f94144;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    --gray-color: #6c757d;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    --transition: all 0.3s ease;
+}
+
+/* 全局样式 */
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: #f5f7fa;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* 导航标签样式 */
+.navbar-tabs {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    padding: 15px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 100;
+}
+
+.navbar-tabs .nav-link {
+    color: rgba(255,255,255,0.9);
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    margin: 0 5px;
+    transition: var(--transition);
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.navbar-tabs .nav-link:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.1);
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+    z-index: -1;
+}
+
+.navbar-tabs .nav-link:hover:before {
+    transform: translateY(0);
+}
+
+.navbar-tabs .nav-link:hover {
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.navbar-tabs .nav-link.active {
+    color: var(--primary-color);
+    background-color: #fff;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.navbar-tabs .nav-link i {
+    margin-right: 8px;
+    font-size: 0.9em;
+}
+
+/* 卡片样式 */
+.card {
+    border: none;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    transition: var(--transition);
+    margin-bottom: 24px;
+    overflow: hidden;
+    background-color: #fff;
+}
+
+.card:hover {
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+.card-header {
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding: 18px 20px;
+}
+
+.card-header h5 {
+    font-weight: 600;
+    margin: 0;
+    color: var(--dark-color);
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* 筛选栏样式 */
+.filter-card {
+    background-color: #fff;
+    border-radius: var(--border-radius);
+}
+
+.filter-card .card-body {
+    background-color: #fff;
+    padding: 20px;
+}
+
+.filter-card .input-group-text {
+    background-color: #f5f7fa;
+    border: 1px solid #e5e8ed;
+    font-weight: 600;
+    color: var(--gray-color);
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+}
+
+.filter-card .form-select,
+.filter-card .form-control {
+    border: 1px solid #e5e8ed;
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+    padding: 10px 15px;
+    height: auto;
+}
+
+.filter-card .btn {
+    padding: 10px 16px;
+    font-weight: 500;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.filter-card .btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.filter-card .btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: #fff;
+    box-shadow: 0 4px 8px rgba(67, 97, 238, 0.3);
+}
+
+.filter-card .btn-outline-secondary {
+    color: var(--gray-color);
+    border-color: #e5e8ed;
+}
+
+.filter-card .btn-outline-secondary:hover {
+    background-color: #f5f7fa;
+    color: var(--dark-color);
+    border-color: #d1d5db;
+}
+
+/* 表格样式 */
+.reconciliation-table {
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+}
+
+.reconciliation-table thead th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: var(--gray-color);
+    border: none;
+    border-bottom: 2px solid rgba(0,0,0,0.05);
+    padding: 16px 20px;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.reconciliation-table tbody tr {
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    transition: var(--transition);
+}
+
+.reconciliation-table tbody td {
+    padding: 16px 20px;
+    vertical-align: middle;
+    border: none;
+}
+
+.reconciliation-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.reconciliation-table tbody tr:hover {
+    background-color: rgba(67, 97, 238, 0.03);
+}
+
+.project-name, .task-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+    font-weight: 500;
+    color: var(--dark-color);
+}
+
+/* 状态标签样式 */
+.badge {
+    padding: 8px 12px;
+    font-weight: 500;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.badge.bg-warning {
+    background: linear-gradient(135deg, #ffbe0b, #fb5607) !important;
+    color: #fff;
+}
+
+.badge.bg-danger {
+    background: linear-gradient(135deg, #ff006e, #ff4d6d) !important;
+    color: #fff;
+}
+
+.badge.bg-success {
+    background: linear-gradient(135deg, #8ac926, #52b69a) !important;
+    color: #fff;
+}
+
+.badge.bg-info {
+    background: linear-gradient(135deg, #4cc9f0, #4361ee) !important;
+    color: #fff;
+}
+
+/* 按钮样式 */
+.btn-group-sm > .btn {
+    border-radius: var(--border-radius);
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    border: none;
+    box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(67, 97, 238, 0.4);
+}
+
+.btn-info {
+    background: linear-gradient(135deg, var(--info-color), #56cfe1);
+    border: none;
+    box-shadow: 0 4px 10px rgba(72, 149, 239, 0.3);
+}
+
+.btn-info:hover {
+    background: linear-gradient(135deg, #56cfe1, var(--info-color));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(72, 149, 239, 0.4);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--success-color), #90e0ef);
+    border: none;
+    box-shadow: 0 4px 10px rgba(76, 201, 240, 0.3);
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #90e0ef, var(--success-color));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(76, 201, 240, 0.4);
+}
+
+/* 差异值样式 */
+.diff-value {
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.diff-value.text-danger {
+    background-color: rgba(255, 0, 110, 0.1);
+    color: #ff006e !important;
+}
+
+.diff-value.text-success {
+    background-color: rgba(138, 201, 38, 0.1);
+    color: #8ac926 !important;
+}
+
+.diff-value small {
+    font-weight: normal;
+    opacity: 0.8;
+    display: block;
+    margin-top: 2px;
+}
+
+/* 空状态样式 */
+.empty-state {
+    padding: 50px 0;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: #e9ecef;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #e9ecef, #ced4da);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.empty-text {
+    color: var(--gray-color);
+    font-size: 1.1rem;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* 分页导航 */
+.pagination-container {
+    background-color: #fff;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding: 15px 0;
+}
+
+.pagination {
+    margin-bottom: 0;
+}
+
+.pagination .page-link {
+    color: var(--primary-color);
+    border: 1px solid #e5e8ed;
+    padding: 10px 16px;
+    margin: 0 3px;
+    border-radius: var(--border-radius) !important;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.pagination .page-link:hover {
+    background-color: #f5f7fa;
+    border-color: #d1d5db;
+    color: var(--secondary-color);
+    z-index: 0;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+    box-shadow: 0 2px 6px rgba(67, 97, 238, 0.3);
+    z-index: 0;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #adb5bd;
+    background-color: #fff;
+    border-color: #e5e8ed;
+}
+
+/* 页脚样式 */
+.footer {
+    background-color: #fff;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding: 25px 0;
+    margin-top: 40px;
+}
+
+.footer .text-muted {
+    color: var(--gray-color) !important;
+    font-size: 0.9rem;
+}
+
+/* 模态框样式 */
+.modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    overflow: hidden;
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    padding: 20px 24px;
+    background-color: #f8f9fa;
+}
+
+.modal-header .modal-title {
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.modal-body {
+    padding: 24px;
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(0,0,0,0.05);
+    padding: 16px 24px;
+    background-color: #f8f9fa;
+}
+
+.modal-body .form-label {
+    font-weight: 600;
+    color: var(--gray-color);
+    margin-bottom: 8px;
+}
+
+.modal-body .form-control,
+.modal-body .form-select {
+    padding: 12px 16px;
+    border-color: #e5e8ed;
+    border-radius: var(--border-radius);
+}
+
+.modal-body .form-control:focus,
+.modal-body .form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
+.modal-body .form-text {
+    color: var(--gray-color);
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+
+/* 响应式样式 */
+@media (max-width: 768px) {
+    .navbar-tabs {
+        padding: 10px 0;
+    }
+    
+    .navbar-tabs .nav-link {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        margin: 0 2px;
+    }
+    
+    .filter-card .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .reconciliation-table thead th,
+    .reconciliation-table tbody td {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
+    
+    .project-name, .task-name {
+        max-width: 120px;
+    }
+    
+    .badge {
+        font-size: 0.7rem;
+        padding: 5px 8px;
+    }
+    
+    .btn-group-sm > .btn {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+}
+
+/* 对账标签样式 */
+
+/* 将不再使用原来的标签样式，因为已经在reconciliation_list.css中重新定义 */
+/* 保留此文件作为兼容性目的 */
+
+/* 标签在页面布局中的新实现在reconciliation_list.css文件中定义 */ 

@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+{% load humanize %}
+{% load static %}
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>任务消耗记录监控</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Select2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f8f9fa;
+        }
+        .content-container {
+            padding: 20px;
+        }
+        .stats-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            height: 100%;
+        }
+        .stats-card .card-body {
+            padding: 20px;
+            z-index: 2;
+            position: relative;
+        }
+        .stats-card h3 {
+            font-weight: 700;
+            margin-top: 10px;
+            margin-bottom: 0;
+        }
+        .stats-card h6 {
+            font-weight: 500;
+            color: rgba(0, 0, 0, 0.6);
+            margin-bottom: 0;
+        }
+        .stats-card .stats-icon {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 2.5rem;
+            opacity: 0.2;
+        }
+        .total-card {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+        }
+        .filled-card {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            color: white;
+        }
+        .unfilled-card {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        .rate-card {
+            background: linear-gradient(45deg, #f39c12, #d35400);
+            color: white;
+        }
+        .table-responsive {
+            overflow-x: auto;
+        }
+        .table th {
+            white-space: nowrap;
+            background-color: #f1f5f9;
+            font-weight: 600;
+        }
+        .table td {
+            vertical-align: middle;
+        }
+        .status-badge {
+            width: 100px;
+            text-align: center;
+            font-weight: 500;
+        }
+        .filter-card {
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .filter-card .card-body {
+            padding: 20px;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #555;
+        }
+        .select2-container--bootstrap-5 .select2-selection {
+            height: 38px;
+            border-color: #dee2e6;
+        }
+        .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+            padding-top: 4px;
+        }
+        .btn-icon {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            line-height: 28px;
+            text-align: center;
+            border-radius: 50%;
+            font-size: 14px;
+        }
+        #toast-container {
+            z-index: 1050;
+        }
+        .progress {
+            height: 8px;
+            border-radius: 4px;
+            background-color: rgba(255,255,255,0.3);
+        }
+        .progress-bar {
+            border-radius: 4px;
+        }
+        .filled-cell {
+            background-color: rgba(46, 204, 113, 0.1) !important;
+        }
+        .unfilled-cell {
+            background-color: rgba(231, 76, 60, 0.1) !important;
+        }
+        .filled-icon {
+            color: #2ecc71;
+            font-size: 1.2rem;
+        }
+        .unfilled-icon {
+            color: #e74c3c;
+            font-size: 1.2rem;
+        }
+        /* 顶部导航样式 */
+        .top-navbar {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 10px 0;
+            margin-bottom: 20px;
+        }
+        .nav-tabs .nav-link {
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: #495057;
+            font-weight: 500;
+            padding: 10px 15px;
+        }
+        .nav-tabs .nav-link:hover {
+            border-color: transparent;
+            color: #007bff;
+        }
+        .nav-tabs .nav-link.active {
+            background-color: transparent;
+            border-bottom: 2px solid #007bff;
+            color: #007bff;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    {% csrf_token %}
+    
+    <div class="content-container">
+        <div class="container-fluid">
+            <!-- 页面标题 -->
+            <div class="row mb-4 align-items-center">
+                <div class="col">
+                    <h4 class="mb-0">
+                        {{ yesterday|date:"Y年m月d日" }} 消耗填写详情
+                    </h4>
+                </div>
+            </div>
+
+            <!-- 统计指标卡片 -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="stats-card total-card">
+                        <div class="card-body">
+                            <h6><i class="fas fa-tasks me-2"></i>进行中任务总数</h6>
+                            <h3>{{ total_active_tasks }}</h3>
+                            <div class="stats-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card filled-card">
+                        <div class="card-body">
+                            <h6><i class="fas fa-check-circle me-2"></i>已填写任务数</h6>
+                            <h3>{{ filled_tasks_count }}</h3>
+                            <div class="stats-icon">
+                                <i class="fas fa-clipboard-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card unfilled-card">
+                        <div class="card-body">
+                            <h6><i class="fas fa-times-circle me-2"></i>未填写任务数</h6>
+                            <h3>{{ unfilled_tasks_count }}</h3>
+                            <div class="stats-icon">
+                                <i class="fas fa-clipboard"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card rate-card">
+                        <div class="card-body">
+                            <h6><i class="fas fa-percent me-2"></i>填写完成率</h6>
+                            <h3>{{ fill_rate|floatformat:2 }}%</h3>
+                            <div class="progress mt-2" style="height: 8px;">
+                                <div class="progress-bar bg-white" role="progressbar" id="fill-rate-bar" data-fill-rate="{{ fill_rate|floatformat:2 }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="stats-icon">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 筛选条件卡片 -->
+            <div class="card filter-card">
+                <div class="card-body">
+                    <form method="get" action="{% url 'consumption_stats:task_consumption_monitor' %}" id="filter-form">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label for="project" class="form-label">项目</label>
+                                <select class="form-select select2-search" id="project" name="project_id" data-placeholder="搜索项目...">
+                                    <option value="">全部项目</option>
+                                    {% for project in projects %}
+                                    <option value="{{ project.ProjectID }}" {% if project.ProjectID|stringformat:"i" == selected_project_id %}selected{% endif %}>
+                                        {{ project.ProjectName }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="optimizer" class="form-label">优化师</label>
+                                <select class="form-select select2-search" id="optimizer" name="optimizer_id" data-placeholder="搜索优化师...">
+                                    <option value="">全部优化师</option>
+                                    {% for optimizer in optimizers %}
+                                    <option value="{{ optimizer.id }}" {% if optimizer.id|stringformat:"i" == selected_optimizer_id %}selected{% endif %}>
+                                        {{ optimizer.username }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="show_type" class="form-label">类型</label>
+                                <select class="form-select" id="show_type" name="show_type">
+                                    <option value="unfilled" {% if show_type == 'unfilled' %}selected{% endif %}>未填写</option>
+                                    <option value="filled" {% if show_type == 'filled' %}selected{% endif %}>已填写</option>
+                                    <option value="all" {% if show_type == 'all' %}selected{% endif %}>全部</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12 text-end">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>查询
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary ms-2" id="reset-btn">
+                                    <i class="fas fa-undo me-2"></i>重置
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 任务列表 -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col" width="5%">#</th>
+                                    <th scope="col" width="15%">任务名称</th>
+                                    <th scope="col" width="15%">项目</th>
+                                    <th scope="col" width="15%">优化师</th>
+                                    <th scope="col" width="13%">开始日期</th>
+                                    <th scope="col" width="13%">填写日期</th>
+                                    <th scope="col" width="10%">填写状态</th>
+                                    <th scope="col" width="10%">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if tasks %}
+                                    {% for task in tasks %}
+                                    <tr class="{% if task.id in filled_task_ids %}filled-cell{% else %}unfilled-cell{% endif %}">
+                                        <th scope="row">{{ forloop.counter0|add:page_obj.start_index }}</th>
+                                        <td>{{ task.name }}</td>
+                                        <td>{{ task.project.ProjectName }}</td>
+                                        <td>
+                                            {% for optimizer in task.optimizer.all %}
+                                                <span class="badge bg-light text-dark">{{ optimizer.username }}</span>
+                                                {% if not forloop.last %}<br>{% endif %}
+                                            {% empty %}
+                                                <span class="text-muted">-</span>
+                                            {% endfor %}
+                                        </td>
+                                        <td>{{ task.start_date|date:"Y-m-d" }}</td>
+                                        <td>{{ yesterday|date:"Y-m-d" }}</td>
+                                        <td>
+                                            {% if task.id in filled_task_ids %}
+                                                <span class="badge bg-success status-badge"><i class="fas fa-check-circle me-1 filled-icon"></i> 已填写</span>
+                                            {% else %}
+                                                <span class="badge bg-danger status-badge"><i class="fas fa-times-circle me-1 unfilled-icon"></i> 未填写</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if task.id not in filled_task_ids %}
+                                                <a href="{% url 'consumption_stats:add_task_consumption' task.id %}?task_id={{ task.id }}" class="btn btn-sm btn-primary" target="_blank">
+                                                    <i class="fas fa-edit me-1"></i>填写
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="8" class="text-center py-4">
+                                            <div class="empty-state">
+                                                <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                                                <h5>暂无符合条件的任务</h5>
+                                                <p class="text-muted">尝试调整筛选条件或刷新页面</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 分页 -->
+                    {% if is_paginated %}
+                    <nav aria-label="任务分页" class="mt-4 d-flex justify-content-center">
+                        <ul class="pagination">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if request.GET.project_id %}&project_id={{ request.GET.project_id }}{% endif %}{% if request.GET.optimizer_id %}&optimizer_id={{ request.GET.optimizer_id }}{% endif %}{% if request.GET.show_type %}&show_type={{ request.GET.show_type }}{% endif %}" aria-label="首页">
+                                        <span aria-hidden="true">&laquo;&laquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.project_id %}&project_id={{ request.GET.project_id }}{% endif %}{% if request.GET.optimizer_id %}&optimizer_id={{ request.GET.optimizer_id }}{% endif %}{% if request.GET.show_type %}&show_type={{ request.GET.show_type }}{% endif %}" aria-label="上一页">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            {% for i in paginator.page_range %}
+                                {% if page_obj.number == i %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ i }}</span>
+                                    </li>
+                                {% elif i > page_obj.number|add:'-3' and i < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ i }}{% if request.GET.project_id %}&project_id={{ request.GET.project_id }}{% endif %}{% if request.GET.optimizer_id %}&optimizer_id={{ request.GET.optimizer_id }}{% endif %}{% if request.GET.show_type %}&show_type={{ request.GET.show_type }}{% endif %}">{{ i }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.project_id %}&project_id={{ request.GET.project_id }}{% endif %}{% if request.GET.optimizer_id %}&optimizer_id={{ request.GET.optimizer_id }}{% endif %}{% if request.GET.show_type %}&show_type={{ request.GET.show_type }}{% endif %}" aria-label="下一页">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ paginator.num_pages }}{% if request.GET.project_id %}&project_id={{ request.GET.project_id }}{% endif %}{% if request.GET.optimizer_id %}&optimizer_id={{ request.GET.optimizer_id }}{% endif %}{% if request.GET.show_type %}&show_type={{ request.GET.show_type }}{% endif %}" aria-label="末页">
+                                        <span aria-hidden="true">&raquo;&raquo;</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript依赖 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            // 初始化Select2
+            $('.select2-search').select2({
+                theme: 'bootstrap-5',
+                width: '100%'
+            });
+            
+            // 设置进度条宽度
+            var fillRate = $('#fill-rate-bar').data('fill-rate');
+            $('#fill-rate-bar').css('width', fillRate + '%');
+            $('#fill-rate-bar').attr('aria-valuenow', fillRate);
+            
+            // 重置按钮事件处理
+            $('#reset-btn').click(function(e) {
+                e.preventDefault();
+                window.location.href = "{% url 'consumption_stats:task_consumption_monitor' %}";
+            });
+            
+            // 自动刷新页面，每30分钟刷新一次
+            setTimeout(function() {
+                location.reload();
+            }, 30 * 60 * 1000); // 30分钟 = 30 * 60 * 1000毫秒
+        });
+    </script>
+</body>
+</html> 

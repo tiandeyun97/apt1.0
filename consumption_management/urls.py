@@ -19,4 +19,5 @@ urlpatterns = [
     path('project-view-data/', views.project_view_data, name='project_view_data'),
     path('search-projects/', views.search_projects, name='search_projects'),
     path('search-tasks/', views.search_tasks, name='search_tasks'),
+    path('monitor/', views.task_consumption_monitor, name='task_consumption_monitor'),
 ] 

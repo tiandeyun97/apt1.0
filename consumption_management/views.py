@@ -18,6 +18,7 @@ from django.utils import timezone
 from django.core.serializers.json import DjangoJSONEncoder
 from organize.models import Department, User
 from .permissions import filter_queryset_by_role, check_task_consumption_permission
+from task_management.permissions import TaskPermission
 
 # 定义辅助函数用于处理默认日期过滤
 def apply_default_date_filter(queryset, start_date=None, end_date=None):
@@ -73,6 +74,7 @@ class TaskConsumptionListView(LoginRequiredMixin, ListView):
             'total_return_flow': queryset.aggregate(Sum('return_flow'))['return_flow__sum'] or 0,
             'total_actual_consumption': queryset.aggregate(Sum('actual_consumption'))['actual_consumption__sum'] or 0,
             'total_registrations': queryset.aggregate(Sum('registrations'))['registrations__sum'] or 0,
+            'total_installations': queryset.aggregate(Sum('installations'))['installations__sum'] or 0,
             'total_first_deposits': queryset.aggregate(Sum('first_deposits'))['first_deposits__sum'] or 0,
             'total_impressions': queryset.aggregate(Sum('impressions'))['impressions__sum'] or 0,
             'total_clicks': queryset.aggregate(Sum('clicks'))['clicks__sum'] or 0,
@@ -118,27 +120,75 @@ def add_task_consumption(request, task_id):
                 # 解析JSON数据
                 json_data = json.loads(request.body)
                 
+                # 处理日期，将字符串转换为日期对象
+                date_str = json_data.get('date')
+                if isinstance(date_str, str):
+                    date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+                else:
+                    date_obj = date_str
+                
                 # 创建消耗记录（使用正确的类型）
+                daily_consumption = Decimal(json_data.get('daily_consumption', 0))
+                # 如果提供了实际消耗，则基于实际消耗计算回流
+                if 'actual_consumption' in json_data:
+                    actual_consumption = Decimal(json_data.get('actual_consumption', 0))
+                    # 验证实际消耗不小于当日消耗
+                    if actual_consumption < daily_consumption:
+                        return JsonResponse({
+                            'success': False,
+                            'error': '实际消耗不能小于当日消耗'
+                        }, status=400)
+                    # 计算回流 = 实际消耗 - 当日消耗
+                    return_flow = actual_consumption - daily_consumption
+                else:
+                    # 如果没有提供实际消耗，则使用表单提供的回流值
+                    return_flow = Decimal(json_data.get('return_flow', 0))
+                
                 consumption = TaskConsumption(
                     task=task,
                     creator=request.user,
-                    date=json_data.get('date'),
-                    daily_consumption=Decimal(json_data.get('daily_consumption', 0)),
-                    return_flow=Decimal(json_data.get('return_flow', 0)),
+                    date=date_obj,
+                    daily_consumption=daily_consumption,
+                    return_flow=return_flow,
                     registrations=int(json_data.get('registrations', 0)),
+                    installations=int(json_data.get('installations', 0)),
                     first_deposits=int(json_data.get('first_deposits', 0)),
                     impressions=int(json_data.get('impressions', 0)),
                     clicks=int(json_data.get('clicks', 0))
                 )
             else:
+                # 处理日期，将字符串转换为日期对象
+                date_str = request.POST.get('date')
+                if isinstance(date_str, str):
+                    date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+                else:
+                    date_obj = date_str
+                
                 # 处理常规表单提交
+                daily_consumption = Decimal(request.POST.get('daily_consumption') or 0)
+                # 如果提供了实际消耗，则基于实际消耗计算回流
+                if request.POST.get('actual_consumption'):
+                    actual_consumption = Decimal(request.POST.get('actual_consumption') or 0)
+                    # 验证实际消耗不小于当日消耗
+                    if actual_consumption < daily_consumption:
+                        return JsonResponse({
+                            'success': False,
+                            'error': '实际消耗不能小于当日消耗'
+                        }, status=400)
+                    # 计算回流 = 实际消耗 - 当日消耗
+                    return_flow = actual_consumption - daily_consumption
+                else:
+                    # 如果没有提供实际消耗，则使用表单提供的回流值
+                    return_flow = Decimal(request.POST.get('return_flow') or 0)
+                
                 consumption = TaskConsumption(
                     task=task,
                     creator=request.user,
-                    date=request.POST.get('date'),
-                    daily_consumption=Decimal(request.POST.get('daily_consumption') or 0),
-                    return_flow=Decimal(request.POST.get('return_flow') or 0),
+                    date=date_obj,
+                    daily_consumption=daily_consumption,
+                    return_flow=return_flow,
                     registrations=int(request.POST.get('registrations') or 0),
+                    installations=int(request.POST.get('installations') or 0),
                     first_deposits=int(request.POST.get('first_deposits') or 0),
                     impressions=int(request.POST.get('impressions') or 0),
                     clicks=int(request.POST.get('clicks') or 0)
@@ -193,6 +243,7 @@ def add_task_consumption(request, task_id):
     total_return_flow = consumptions.aggregate(Sum('return_flow'))['return_flow__sum'] or 0
     total_actual_consumption = consumptions.aggregate(Sum('actual_consumption'))['actual_consumption__sum'] or 0
     total_registrations = consumptions.aggregate(Sum('registrations'))['registrations__sum'] or 0
+    total_installations = consumptions.aggregate(Sum('installations'))['installations__sum'] or 0
     total_first_deposits = consumptions.aggregate(Sum('first_deposits'))['first_deposits__sum'] or 0
     total_impressions = consumptions.aggregate(Sum('impressions'))['impressions__sum'] or 0
     total_clicks = consumptions.aggregate(Sum('clicks'))['clicks__sum'] or 0
@@ -207,6 +258,7 @@ def add_task_consumption(request, task_id):
         'total_return_flow': total_return_flow,
         'total_actual_consumption': total_actual_consumption,
         'total_registrations': total_registrations,
+        'total_installations': total_installations,
         'total_first_deposits': total_first_deposits,
         'total_impressions': total_impressions,
         'total_clicks': total_clicks,
@@ -227,6 +279,19 @@ def delete_task_consumption(request, task_id, consumption_id):
     
     consumption = get_object_or_404(TaskConsumption, id=consumption_id, task_id=task_id)
     task = consumption.task
+    
+    # 检查任务状态是否为"已结束完成对账"(状态ID为6)
+    if task.status.TaskStatusID == 6:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'error': '任务已结束完成对账，不能删除消耗记录'
+            }, status=403)
+        
+        return render(request, 'consumption_stats/add_task_consumption.html', {
+            'task': task,
+            'error_message': '任务已结束完成对账，不能删除消耗记录'
+        }, status=403)
     
     # 检查用户权限
     if not check_task_consumption_permission(request.user, task, "delete"):
@@ -272,6 +337,18 @@ def edit_task_consumption(request, task_id, consumption_id):
     task = get_object_or_404(Task, id=task_id)
     consumption = get_object_or_404(TaskConsumption, id=consumption_id, task_id=task_id)
     
+    # 检查任务状态是否为"已结束完成对账"(状态ID为6)
+    if task.status.TaskStatusID == 6:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'error': '任务已结束完成对账，不能编辑消耗记录'
+            }, status=403)
+        
+        return render(request, 'consumption_stats/task_consumption_list.html', {
+            'error_message': '任务已结束完成对账，不能编辑消耗记录'
+        }, status=403)
+    
     # 检查用户权限
     if not check_task_consumption_permission(request.user, task, "edit"):
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -292,6 +369,7 @@ def edit_task_consumption(request, task_id, consumption_id):
             'daily_consumption': float(consumption.daily_consumption),
             'return_flow': float(consumption.return_flow),
             'registrations': consumption.registrations,
+            'installations': consumption.installations,
             'first_deposits': consumption.first_deposits,
             'impressions': consumption.impressions,
             'clicks': consumption.clicks
@@ -306,20 +384,78 @@ def edit_task_consumption(request, task_id, consumption_id):
                 # 解析JSON数据
                 json_data = json.loads(request.body)
                 
+                # 处理日期，将字符串转换为日期对象
+                date_str = json_data.get('date')
+                if isinstance(date_str, str):
+                    date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+                else:
+                    date_obj = date_str
+                
                 # 更新消耗记录
-                consumption.date = json_data.get('date')
-                consumption.daily_consumption = Decimal(json_data.get('daily_consumption', 0))
-                consumption.return_flow = Decimal(json_data.get('return_flow', 0))
+                consumption.date = date_obj
+                
+                # 获取当日消耗
+                daily_consumption = Decimal(json_data.get('daily_consumption', 0))
+                consumption.daily_consumption = daily_consumption
+                
+                # 如果提供了实际消耗，则基于实际消耗计算回流
+                if 'actual_consumption' in json_data:
+                    actual_consumption = Decimal(json_data.get('actual_consumption', 0))
+                    # 验证实际消耗不小于当日消耗
+                    if actual_consumption < daily_consumption:
+                        return JsonResponse({
+                            'success': False,
+                            'error': '实际消耗不能小于当日消耗'
+                        }, status=400)
+                    # 计算回流 = 实际消耗 - 当日消耗
+                    return_flow = actual_consumption - daily_consumption
+                    consumption.return_flow = return_flow
+                else:
+                    # 如果没有提供实际消耗，则使用表单提供的回流值
+                    consumption.return_flow = Decimal(json_data.get('return_flow', 0))
+                
                 consumption.registrations = int(json_data.get('registrations', 0))
+                consumption.installations = int(json_data.get('installations', 0))
                 consumption.first_deposits = int(json_data.get('first_deposits', 0))
                 consumption.impressions = int(json_data.get('impressions', 0))
                 consumption.clicks = int(json_data.get('clicks', 0))
             else:
                 # 处理常规表单提交
-                consumption.date = request.POST.get('date')
-                consumption.daily_consumption = Decimal(request.POST.get('daily_consumption') or 0)
-                consumption.return_flow = Decimal(request.POST.get('return_flow') or 0)
+                # 处理日期，将字符串转换为日期对象
+                date_str = request.POST.get('date')
+                if isinstance(date_str, str):
+                    date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+                else:
+                    date_obj = date_str
+                
+                consumption.date = date_obj
+                
+                # 获取当日消耗
+                daily_consumption = Decimal(request.POST.get('daily_consumption') or 0)
+                consumption.daily_consumption = daily_consumption
+                
+                # 如果提供了实际消耗，则基于实际消耗计算回流
+                if request.POST.get('actual_consumption'):
+                    actual_consumption = Decimal(request.POST.get('actual_consumption') or 0)
+                    # 验证实际消耗不小于当日消耗
+                    if actual_consumption < daily_consumption:
+                        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                            return JsonResponse({
+                                'success': False,
+                                'error': '实际消耗不能小于当日消耗'
+                            }, status=400)
+                        return render(request, 'consumption_stats/task_consumption_list.html', {
+                            'error_message': '实际消耗不能小于当日消耗'
+                        }, status=400)
+                    # 计算回流 = 实际消耗 - 当日消耗
+                    return_flow = actual_consumption - daily_consumption
+                    consumption.return_flow = return_flow
+                else:
+                    # 如果没有提供实际消耗，则使用表单提供的回流值
+                    consumption.return_flow = Decimal(request.POST.get('return_flow') or 0)
+                
                 consumption.registrations = int(request.POST.get('registrations') or 0)
+                consumption.installations = int(request.POST.get('installations') or 0)
                 consumption.first_deposits = int(request.POST.get('first_deposits') or 0)
                 consumption.impressions = int(request.POST.get('impressions') or 0)
                 consumption.clicks = int(request.POST.get('clicks') or 0)
@@ -367,13 +503,15 @@ def get_task_consumption(request, task_id, consumption_id):
             'error': '您没有权限查看此记录'
         }, status=403)
     
-    # 返回记录数据
+    # 返回记录数据，增加实际消耗字段
     data = {
         'id': str(consumption.id),
         'date': consumption.date.strftime('%Y-%m-%d'),
         'daily_consumption': float(consumption.daily_consumption),
         'return_flow': float(consumption.return_flow),
+        'actual_consumption': float(consumption.actual_consumption),
         'registrations': consumption.registrations,
+        'installations': consumption.installations,
         'first_deposits': consumption.first_deposits,
         'impressions': consumption.impressions,
         'clicks': consumption.clicks
@@ -486,6 +624,7 @@ class ConsumptionAnalysisView(LoginRequiredMixin, TemplateView):
             'total_return_flow': queryset.aggregate(Sum('return_flow'))['return_flow__sum'] or 0,
             'total_actual_consumption': queryset.aggregate(Sum('actual_consumption'))['actual_consumption__sum'] or 0,
             'total_registrations': queryset.aggregate(Sum('registrations'))['registrations__sum'] or 0,
+            'total_installations': queryset.aggregate(Sum('installations'))['installations__sum'] or 0,
             'total_first_deposits': queryset.aggregate(Sum('first_deposits'))['first_deposits__sum'] or 0,
             'total_impressions': queryset.aggregate(Sum('impressions'))['impressions__sum'] or 0,
             'total_clicks': queryset.aggregate(Sum('clicks'))['clicks__sum'] or 0,
@@ -658,6 +797,7 @@ def consumption_records_list(request):
         'total_return_flow': filtered_queryset.aggregate(Sum('return_flow'))['return_flow__sum'] or 0,
         'total_actual_consumption': filtered_queryset.aggregate(Sum('actual_consumption'))['actual_consumption__sum'] or 0,
         'total_registrations': filtered_queryset.aggregate(Sum('registrations'))['registrations__sum'] or 0,
+        'total_installations': filtered_queryset.aggregate(Sum('installations'))['installations__sum'] or 0,
         'total_first_deposits': filtered_queryset.aggregate(Sum('first_deposits'))['first_deposits__sum'] or 0,
         'total_impressions': filtered_queryset.aggregate(Sum('impressions'))['impressions__sum'] or 0,
         'total_clicks': filtered_queryset.aggregate(Sum('clicks'))['clicks__sum'] or 0,
@@ -1007,6 +1147,7 @@ def export_excel(request):
             '点击转化率': float(consumption.click_conversion_rate),
             '点击成本': float(consumption.click_cost),
             '注册人数': consumption.registrations,
+            '安装量': consumption.installations,
             '注册转化率': float(consumption.registration_conversion_rate),
             '注册成本': float(consumption.registration_cost),
             '首充人数': consumption.first_deposits,
@@ -1033,6 +1174,7 @@ def export_excel(request):
         '点击转化率': '',
         '点击成本': '',
         '注册人数': queryset.aggregate(Sum('registrations'))['registrations__sum'] or 0,
+        '安装量': queryset.aggregate(Sum('installations'))['installations__sum'] or 0,
         '注册转化率': '',
         '注册成本': '',
         '首充人数': queryset.aggregate(Sum('first_deposits'))['first_deposits__sum'] or 0,
@@ -1087,13 +1229,14 @@ def export_excel(request):
         worksheet.set_column('J:J', 10, percent_format)  # 点击转化率
         worksheet.set_column('K:K', 12, money_format)  # 点击成本
         worksheet.set_column('L:L', 10)  # 注册人数
-        worksheet.set_column('M:M', 10, percent_format)  # 注册转化率
-        worksheet.set_column('N:N', 12, money_format)  # 注册成本
-        worksheet.set_column('O:O', 10)  # 首充人数
-        worksheet.set_column('P:P', 10, percent_format)  # 首充转化率
-        worksheet.set_column('Q:Q', 12, money_format)  # 首充成本
-        worksheet.set_column('R:R', 12, money_format)  # ECPM
-        worksheet.set_column('S:S', 15)  # 创建人
+        worksheet.set_column('M:M', 10)  # 安装量
+        worksheet.set_column('N:N', 10, percent_format)  # 注册转化率
+        worksheet.set_column('O:O', 12, money_format)  # 注册成本
+        worksheet.set_column('P:P', 10)  # 首充人数
+        worksheet.set_column('Q:Q', 10, percent_format)  # 首充转化率
+        worksheet.set_column('R:R', 12, money_format)  # 首充成本
+        worksheet.set_column('S:S', 12, money_format)  # ECPM
+        worksheet.set_column('T:T', 15)  # 创建人
         
         # 冻结窗格
         worksheet.freeze_panes(1, 0)
@@ -1156,6 +1299,7 @@ def download_import_template(request):
         '展示量(可选,整数)': 1000,
         '点击量(可选,整数)': 100,
         '注册人数(可选,整数)': 10,
+        '安装量(可选,整数)': 20,
         '首充人数(可选,整数)': 5,
         '创建人(可选)': request.user.username
     })
@@ -1222,6 +1366,7 @@ def download_import_template(request):
             ['展示量', '可选，广告展示次数', '整数', '1000'],
             ['点击量', '可选，广告点击次数', '整数', '100'],
             ['注册人数', '可选，用户注册数量', '整数', '10'],
+            ['安装量', '可选，应用安装数量', '整数', '20'],
             ['首充人数', '可选，首次充值用户数量', '整数', '5'],
             ['创建人', '可选，如不填则使用导入用户作为创建人', '系统中存在的用户名', sample_users_text]
         ]
@@ -1290,11 +1435,7 @@ def import_consumptions(request):
     if request.method != 'POST':
         return redirect('consumption_stats:consumption_records_list')
     
-    # 检查用户权限
-    is_admin_or_operator = request.user.is_superuser or request.user.groups.filter(name__in=['管理员', '运营']).exists()
-    if not is_admin_or_operator:
-        messages.error(request, "您没有权限导入消耗记录")
-        return redirect('consumption_stats:consumption_records_list')
+    # 所有用户都可以导入消耗记录，无需权限检查
     
     # 检查是否上传了文件
     if 'import_file' not in request.FILES:
@@ -1412,6 +1553,7 @@ def import_consumptions(request):
             impressions = int(row.get('展示量(可选,整数)', 0)) if not pd.isna(row.get('展示量(可选,整数)', 0)) else 0
             clicks = int(row.get('点击量(可选,整数)', 0)) if not pd.isna(row.get('点击量(可选,整数)', 0)) else 0
             registrations = int(row.get('注册人数(可选,整数)', 0)) if not pd.isna(row.get('注册人数(可选,整数)', 0)) else 0
+            installations = int(row.get('安装量(可选,整数)', 0)) if not pd.isna(row.get('安装量(可选,整数)', 0)) else 0
             first_deposits = int(row.get('首充人数(可选,整数)', 0)) if not pd.isna(row.get('首充人数(可选,整数)', 0)) else 0
         except (ValueError, TypeError, InvalidOperation):
             errors.append(f"第{row_num}行: 数值字段格式错误")
@@ -1443,6 +1585,7 @@ def import_consumptions(request):
             'impressions': impressions,
             'clicks': clicks,
             'registrations': registrations,
+            'installations': installations,
             'first_deposits': first_deposits
         })
     
@@ -1473,6 +1616,7 @@ def import_consumptions(request):
                               'impressions': record['impressions'],
                               'clicks': record['clicks'],
                               'registrations': record['registrations'],
+                              'installations': record['installations'],
                               'first_deposits': record['first_deposits']} 
                               for record in valid_records]
         }
@@ -1505,6 +1649,7 @@ def import_consumptions(request):
                     existing_record.impressions = record['impressions']
                     existing_record.clicks = record['clicks']
                     existing_record.registrations = record['registrations']
+                    existing_record.installations = record['installations']
                     existing_record.first_deposits = record['first_deposits']
                     existing_record.creator = record['creator']
                     existing_record.save()
@@ -1519,6 +1664,7 @@ def import_consumptions(request):
                         impressions=record['impressions'],
                         clicks=record['clicks'],
                         registrations=record['registrations'],
+                        installations=record['installations'],
                         first_deposits=record['first_deposits'],
                         creator=record['creator']
                     )
@@ -1593,6 +1739,7 @@ def confirm_import(request):
                 impressions = record_data['impressions']
                 clicks = record_data['clicks']
                 registrations = record_data['registrations']
+                installations = record_data.get('installations', 0)
                 first_deposits = record_data['first_deposits']
                 
                 # 检查记录是否已存在
@@ -1605,6 +1752,7 @@ def confirm_import(request):
                     existing_record.impressions = impressions
                     existing_record.clicks = clicks
                     existing_record.registrations = registrations
+                    existing_record.installations = installations
                     existing_record.first_deposits = first_deposits
                     existing_record.creator = creator
                     existing_record.save()
@@ -1619,6 +1767,7 @@ def confirm_import(request):
                         impressions=impressions,
                         clicks=clicks,
                         registrations=registrations,
+                        installations=installations,
                         first_deposits=first_deposits,
                         creator=creator
                     )
@@ -1710,6 +1859,18 @@ def update_return_flow(request, consumption_id):
     """直接更新消耗记录的回流值"""
     consumption = get_object_or_404(TaskConsumption, id=consumption_id)
     
+    # 检查任务状态是否为"已结束完成对账"(状态ID为6)
+    if consumption.task.status.TaskStatusID == 6:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'error': '任务已结束完成对账，不能修改回流数据'
+            }, status=403)
+        
+        return render(request, 'consumption_stats/error.html', {
+            'error_message': '任务已结束完成对账，不能修改回流数据'
+        }, status=403)
+    
     # 检查用户权限
     if not check_task_consumption_permission(request.user, consumption.task, "edit"):
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -1726,10 +1887,28 @@ def update_return_flow(request, consumption_id):
         try:
             # 解析JSON数据
             data = json.loads(request.body)
-            new_return_flow = Decimal(data.get('return_flow', 0))
             
-            # 更新回流值
-            consumption.return_flow = new_return_flow
+            # 判断是更新实际消耗还是回流
+            if 'actual_consumption' in data:
+                # 更新实际消耗
+                new_actual_consumption = Decimal(data.get('actual_consumption', 0))
+                daily_consumption = consumption.daily_consumption
+                
+                # 验证实际消耗不小于当日消耗
+                if new_actual_consumption < daily_consumption:
+                    return JsonResponse({
+                        'success': False,
+                        'error': '实际消耗不能小于当日消耗'
+                    }, status=400)
+                
+                # 计算新的回流值
+                new_return_flow = new_actual_consumption - daily_consumption
+                consumption.return_flow = new_return_flow
+            else:
+                # 兼容旧代码，直接更新回流值
+                new_return_flow = Decimal(data.get('return_flow', 0))
+                consumption.return_flow = new_return_flow
+            
             consumption.save()  # 这会触发模型中的save方法自动计算其他派生字段
             
             # 返回更新后的数据，格式化为两位小数
@@ -1764,3 +1943,120 @@ def update_return_flow(request, consumption_id):
         'success': False, 
         'error': '仅支持POST请求'
     }, status=405)
+
+@login_required
+def task_consumption_monitor(request):
+    """
+    监控进行中任务前一天是否填写了消耗记录
+    """
+    from task_management.models import Task
+    from task_management.permissions import TaskPermission
+    from django.utils import timezone
+    from datetime import timedelta
+
+    # 获取前一天日期
+    yesterday = timezone.now().date() - timedelta(days=1)
+    
+    # 筛选条件
+    project_id = request.GET.get('project_id')
+    optimizer_id = request.GET.get('optimizer_id')
+    show_type = request.GET.get('show_type', 'unfilled')  # 默认只显示未填写的任务
+    
+    # 获取所有进行中的任务
+    active_tasks = Task.objects.filter(status__TaskStatusName='进行中')
+    
+    # 应用任务权限过滤
+    active_tasks = TaskPermission.filter_tasks_by_role(active_tasks, request.user)
+    
+    # 项目筛选
+    if project_id:
+        active_tasks = active_tasks.filter(project_id=project_id)
+    
+    # 优化师筛选
+    if optimizer_id:
+        active_tasks = active_tasks.filter(optimizer__id=optimizer_id)
+    
+    # 获取前一天已有消耗记录的任务ID列表
+    filled_task_ids = TaskConsumption.objects.filter(
+        date=yesterday
+    ).values_list('task_id', flat=True).distinct()
+    
+    # 根据显示类型筛选任务
+    if show_type == 'all':
+        # 显示所有任务，不做额外筛选
+        pass
+    elif show_type == 'filled':
+        # 只显示已填写的任务
+        active_tasks = active_tasks.filter(id__in=filled_task_ids)
+    else:  # 默认 'unfilled'
+        # 只显示未填写的任务
+        active_tasks = active_tasks.exclude(id__in=filled_task_ids)
+    
+    # 获取任务的优化师信息
+    from django.db.models import Count, Prefetch
+    
+    # 预加载数据以提高性能
+    active_tasks = active_tasks.select_related('project', 'status', 'company').prefetch_related(
+        'optimizer'
+    )
+    
+    # 获取项目列表（用于筛选）
+    from tasks.models import Project
+    projects = Project.objects.filter(
+        ProjectID__in=active_tasks.values_list('project_id', flat=True).distinct()
+    ).order_by('ProjectName')
+    
+    # 获取优化师列表（用于筛选）
+    from organize.models import User
+    optimizers = User.objects.filter(
+        groups__name__in=['部门主管', '小组长', '优化师'],
+        id__in=active_tasks.values_list('optimizer', flat=True).distinct()
+    ).order_by('username')
+    
+    # 统计数据
+    total_active_tasks = active_tasks.count()
+    filled_tasks_count = active_tasks.filter(id__in=filled_task_ids).count()
+    unfilled_tasks_count = total_active_tasks - filled_tasks_count
+    
+    if total_active_tasks > 0:
+        fill_rate = (filled_tasks_count / total_active_tasks) * 100
+    else:
+        fill_rate = 0
+    
+    # 实现分页功能
+    from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+    page = request.GET.get('page', 1)
+    try:
+        page = int(page)
+    except ValueError:
+        page = 1
+    
+    paginator = Paginator(active_tasks, 20)  # 每页显示20条记录
+    
+    try:
+        paginated_tasks = paginator.page(page)
+    except PageNotAnInteger:
+        paginated_tasks = paginator.page(1)
+    except EmptyPage:
+        paginated_tasks = paginator.page(paginator.num_pages)
+    
+    # 准备上下文
+    context = {
+        'tasks': paginated_tasks,
+        'projects': projects,
+        'optimizers': optimizers,
+        'yesterday': yesterday,
+        'total_active_tasks': total_active_tasks,
+        'filled_tasks_count': filled_tasks_count,
+        'unfilled_tasks_count': unfilled_tasks_count,
+        'fill_rate': fill_rate,
+        'selected_project_id': project_id,
+        'selected_optimizer_id': optimizer_id,
+        'show_type': show_type,
+        'paginator': paginator,
+        'page_obj': paginated_tasks,
+        'is_paginated': True if paginator.num_pages > 1 else False,
+        'filled_task_ids': list(filled_task_ids),  # 转换为列表以便在模板中使用
+    }
+    
+    return render(request, 'consumption_stats/task_consumption_monitor.html', context)
